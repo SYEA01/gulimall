@@ -63,6 +63,13 @@
             <version>2.5</version>
             <scope>provided</scope>  <!--目标环境已存在，打包的时候就不会带上这个依赖了-->
         </dependency>
+
+        <!--Nacos注册中心-->
+        <dependency>
+            <groupId>com.alibaba.cloud</groupId>
+            <artifactId>spring-cloud-starter-alibaba-nacos-discovery</artifactId>
+        </dependency>
+
     </dependencies>
 
     <dependencyManagement>  <!--依赖管理-->
