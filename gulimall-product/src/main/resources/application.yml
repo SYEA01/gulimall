@@ -4,6 +4,11 @@ spring:
     password: root
     url: jdbc:mysql://192.168.100.133:3306/gulimall_pms?useSSL=false
     driver-class-name: com.mysql.jdbc.Driver
+  cloud:
+    nacos:
+      discovery:
+        # Nacos注册中心的地址
+        server-addr: 192.168.100.133:8848
 
 
 mybatis-plus:
@@ -13,3 +18,4 @@ mybatis-plus:
       id-type: auto  # 主键自增
 server:
   port: 10000
+
