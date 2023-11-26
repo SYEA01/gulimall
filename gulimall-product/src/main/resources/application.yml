@@ -16,6 +16,14 @@ mybatis-plus:
   global-config:
     db-config:
       id-type: auto  # 主键自增
+      # 逻辑已删除值(默认为 1)
+      logic-delete-value: 1
+      # 逻辑未删除值(默认为 0)
+      logic-not-delete-value: 0
 server:
   port: 10000
 
+# 调整日志级别
+logging:
+  level:
+    com.example.gulimall: debug

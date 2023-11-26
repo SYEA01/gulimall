@@ -2,18 +2,15 @@ package com.example.gulimall.product.controller;
 
 import java.util.Arrays;
 import java.util.List;
-import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.example.gulimall.product.entity.CategoryEntity;
 import com.example.gulimall.product.service.CategoryService;
-import com.example.common.utils.PageUtils;
 import com.example.common.utils.R;
 
 
@@ -77,11 +74,17 @@ public class CategoryController {
 
     /**
      * 删除
+     * @RequestBody：获取请求体，必须发送POST请求
+     * SpringMVC自动将请求体的数据（JSON）转为对应的对象
      */
     @RequestMapping("/delete")
 //    @RequiresPermissions("product:category:delete")
     public R delete(@RequestBody Long[] catIds) {
-        categoryService.removeByIds(Arrays.asList(catIds));
+
+        // 1、检查当前删除的菜单，是否被别的地方引用
+//        categoryService.removeByIds(Arrays.asList(catIds));
+
+        categoryService.removeMenuByIds(Arrays.asList(catIds));
 
         return R.ok();
     }

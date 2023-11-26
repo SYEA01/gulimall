@@ -55,6 +55,8 @@ public class CategoryServiceImpl extends ServiceImpl<CategoryDao, CategoryEntity
         return level1Menus;
     }
 
+
+
     /**
      * 递归查询所有菜单的子菜单
      *
@@ -74,6 +76,14 @@ public class CategoryServiceImpl extends ServiceImpl<CategoryDao, CategoryEntity
                     return (preMenu.getSort() == null ? 0 : preMenu.getSort()) - (nextMenu.getSort() == null ? 0 : nextMenu.getSort());
                 }).collect(Collectors.toList());
         return children;
+    }
+
+    @Override
+    public void removeMenuByIds(List<Long> list) {
+        //TODO   1、检查当前删除的菜单，是否被别的地方引用
+
+        // 2、逻辑删除
+        baseMapper.deleteBatchIds(list);
     }
 
 }
