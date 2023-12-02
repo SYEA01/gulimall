@@ -1,6 +1,7 @@
 package com.example.gulimall.product;
 
 import com.aliyun.oss.OSS;
+import com.aliyun.oss.OSSClient;
 import com.aliyun.oss.OSSClientBuilder;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.example.gulimall.product.entity.BrandEntity;
@@ -16,23 +17,31 @@ import java.io.FileNotFoundException;
 import java.io.InputStream;
 import java.util.List;
 
+/**
+ * 1、引入oss-starter
+ * 2、配置Key，endpoint相关信息
+ * 3、使用OSSClient进行相关操作
+ */
 @SpringBootTest
 @RunWith(SpringRunner.class)
 public class GulimallProductApplicationTests {
     @Autowired
     private BrandService brandService;
 
+    @Autowired
+    OSSClient ossClient;
+
     @Test
     public void testUpload() throws FileNotFoundException {
-        // Endpoint
-        String endpoint = "oss-cn-beijing.aliyuncs.com";
-        String accessKeyId = "LTAI5tEBjMBdeVSmkzpesNJh";
-        String accessKeySecret = "a0Rx3CNeogfdLh7DxW3vzGfIkJjgDU";
-        // 创建OSSClient实例
-        OSS ossClient = new OSSClientBuilder().build(endpoint, accessKeyId, accessKeySecret);
+//        // Endpoint
+//        String endpoint = "oss-cn-beijing.aliyuncs.com";
+//        String accessKeyId = "LTAI5tEBjMBdeVSmkzpesNJh";
+//        String accessKeySecret = "a0Rx3CNeogfdLh7DxW3vzGfIkJjgDU";
+//        // 创建OSSClient实例
+//        OSS ossClient = new OSSClientBuilder().build(endpoint, accessKeyId, accessKeySecret);
 
-        InputStream inputStream = new FileInputStream("D:\\百度网盘下载路径\\docs\\pics\\1f15cdbcf9e1273c.jpg");
-        ossClient.putObject("gulimall-taoao", "AA.jpg", inputStream);
+        InputStream inputStream = new FileInputStream("D:\\百度网盘下载路径\\docs\\pics\\335b2c690e43a8f8.jpg");
+        ossClient.putObject("gulimall-taoao", "BB.jpg", inputStream);
 
         ossClient.shutdown();
 

@@ -9,6 +9,14 @@ spring:
       discovery:
         # Nacos注册中心的地址
         server-addr: 192.168.100.133:8848
+    alicloud:
+      # 配置AccessKey
+      access-key: LTAI5tEBjMBdeVSmkzpesNJh
+      # 配置AccessKeySecret
+      secret-key: a0Rx3CNeogfdLh7DxW3vzGfIkJjgDU
+      oss:
+        # 配置endpoint
+        endpoint: oss-cn-beijing.aliyuncs.com
 
 
 mybatis-plus:
@@ -22,7 +30,6 @@ mybatis-plus:
       logic-not-delete-value: 0
 server:
   port: 10000
-
 # 调整日志级别
 logging:
   level:
