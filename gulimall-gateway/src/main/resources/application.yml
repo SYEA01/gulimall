@@ -22,6 +22,12 @@ spring:
             # 路径重写   【 将 /api/(?<segment>.*) 路径 自动重写成 /$\{segment} 路径  】
             - RewritePath=/api/(?<segment>.*),/$\{segment}
 
+        - id: third_party_route
+          uri: lb://gulimall-third-party
+          predicates:
+            - Path=/api/thirdparty/**
+          filters:
+            - RewritePath=/api/thirdparty/(?<segment>.*),/$\{segment}
 
         # 路由规则   【 只要发送 /api/** 格式的任意请求 ， 就会默认先路由到 renren-fast 服务， 并且会把路径 /api/** 重写成 /renren-fast/**  】
         - id: admin_route
