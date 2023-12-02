@@ -1,8 +1,6 @@
 package com.example.gulimall.product;
 
-import com.aliyun.oss.OSS;
-import com.aliyun.oss.OSSClient;
-import com.aliyun.oss.OSSClientBuilder;
+
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.example.gulimall.product.entity.BrandEntity;
 import com.example.gulimall.product.service.BrandService;
@@ -28,25 +26,7 @@ public class GulimallProductApplicationTests {
     @Autowired
     private BrandService brandService;
 
-    @Autowired
-    OSSClient ossClient;
 
-    @Test
-    public void testUpload() throws FileNotFoundException {
-//        // Endpoint
-//        String endpoint = "oss-cn-beijing.aliyuncs.com";
-//        String accessKeyId = "LTAI5tEBjMBdeVSmkzpesNJh";
-//        String accessKeySecret = "a0Rx3CNeogfdLh7DxW3vzGfIkJjgDU";
-//        // 创建OSSClient实例
-//        OSS ossClient = new OSSClientBuilder().build(endpoint, accessKeyId, accessKeySecret);
-
-        InputStream inputStream = new FileInputStream("D:\\百度网盘下载路径\\docs\\pics\\335b2c690e43a8f8.jpg");
-        ossClient.putObject("gulimall-taoao", "BB.jpg", inputStream);
-
-        ossClient.shutdown();
-
-        System.out.println("上传完成");
-    }
 
     @Test
     public void contextLoads() {

@@ -22,11 +22,7 @@
     </properties>
 
     <dependencies>
-        <!--阿里云OSS对象存储-->
-        <dependency>
-            <groupId>com.alibaba.cloud</groupId>
-            <artifactId>spring-cloud-starter-alicloud-oss</artifactId>
-        </dependency>
+
 
         <!--mybatis-plus-->
         <dependency>
