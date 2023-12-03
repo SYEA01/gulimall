@@ -39,6 +39,14 @@ import org.springframework.cloud.client.discovery.EnableDiscoveryClient;
  *      效果：校验错误以后会有默认的响应
  *  3）、给校验的bean后紧跟一个BindingResult，就可以获取到校验的结果  【 public R save(@Valid @RequestBody BrandEntity brand, BindingResult result){} 】
  *
+ *  4）、分组检验（多场景的复杂校验）
+ *      步骤：
+ *          1、首先创建好多个空接口，用作不同的分组
+ *          2、给校验注解标注 groups 字段，指定 ”步骤1“中创建的空接口
+ *          3、Controller 中，接口上使用【 @Validated(分组（空接口）.class) 】注解  【【      public R save(@Validated(AddGroup.class) @RequestBody BrandEntity brand) {}  】】
+ *      注意：
+ *          1、@Validated 注解如果不指定分组，那么都会生效
+ *          2、@Validated(value={分组.class}) 注解如果指定了分组，那么它只会校验对应分组的数据是否正常
  *
  * 4、统一异常处理
  *  1）、对于抛出的异常，可以创建统一异常处理类，
