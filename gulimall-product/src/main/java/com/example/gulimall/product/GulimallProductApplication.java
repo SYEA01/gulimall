@@ -32,6 +32,12 @@ import org.springframework.cloud.client.discovery.EnableDiscoveryClient;
  *  步骤 2: 实体类字段上加上@TableLogic注解
  *      @TableLogic
  *      private Integer deleted;
+ *
+ * 3、JSR303数据校验
+ *  1）、给Bean中的字段添加校验注解，并定义自己的message 提示  【 javax.validation.constraints 包下 】
+ *  2）、开启校验功能 ： 在Controller接口接收参数时，使用 @Valid 注解
+ *      效果：校验错误以后会有默认的响应
+ *  3）、给校验的bean后紧跟一个BindingResult，就可以获取到校验的结果  【 public R save(@Valid @RequestBody BrandEntity brand, BindingResult result){} 】
  */
 @SpringBootApplication
 @MapperScan("com.example.gulimall.product.dao")
