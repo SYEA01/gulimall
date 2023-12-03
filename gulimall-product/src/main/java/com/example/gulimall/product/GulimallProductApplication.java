@@ -38,6 +38,14 @@ import org.springframework.cloud.client.discovery.EnableDiscoveryClient;
  *  2）、开启校验功能 ： 在Controller接口接收参数时，使用 @Valid 注解
  *      效果：校验错误以后会有默认的响应
  *  3）、给校验的bean后紧跟一个BindingResult，就可以获取到校验的结果  【 public R save(@Valid @RequestBody BrandEntity brand, BindingResult result){} 】
+ *
+ *
+ * 4、统一异常处理
+ *  1）、对于抛出的异常，可以创建统一异常处理类，
+ *      1、使用 @RestControllerAdvice(basePackages="需要异常处理的包") 注解标注这个类
+ *      2、使用 @ExceptionHandler(value="具体的异常类型.class") 注解标注其中的方法， 【 返回值类型：R、 参数：具体的异常类型 】
+ *  2）、对于常见的异常状态码以及提示消息，可以创建枚举类统一管理
+ *
  */
 @SpringBootApplication
 @MapperScan("com.example.gulimall.product.dao")
