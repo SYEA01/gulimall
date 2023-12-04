@@ -1,9 +1,18 @@
 package com.example.gulimall.product;
 
+import com.example.common.valid.custom.ListValue;
 import org.mybatis.spring.annotation.MapperScan;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.cloud.client.discovery.EnableDiscoveryClient;
+import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.RestControllerAdvice;
+
+import javax.validation.ConstraintValidator;
+import javax.validation.ConstraintValidatorContext;
+import javax.validation.Payload;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * 1、整合MyBatis-Plus
@@ -47,6 +56,12 @@ import org.springframework.cloud.client.discovery.EnableDiscoveryClient;
  *      注意：
  *          1、@Validated 注解如果不指定分组，那么都会生效
  *          2、@Validated(value={分组.class}) 注解如果指定了分组，那么它只会校验对应分组的数据是否正常
+ *
+ *   5）、自定义校验
+ *      步骤：
+ *          1、编写一个自定义的校验注解
+ *          2、编写一个自定义的校验器
+ *          3、关联这个校验器和这个校验注解
  *
  * 4、统一异常处理
  *  1）、对于抛出的异常，可以创建统一异常处理类，

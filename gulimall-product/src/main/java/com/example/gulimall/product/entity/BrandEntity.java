@@ -8,6 +8,8 @@ import java.util.Date;
 
 import com.example.common.valid.AddGroup;
 import com.example.common.valid.UpdateGroup;
+import com.example.common.valid.UpdateStatusGroup;
+import com.example.common.valid.custom.ListValue;
 import lombok.Data;
 import org.hibernate.validator.constraints.URL;
 
@@ -50,11 +52,13 @@ public class BrandEntity implements Serializable {
     /**
      * 显示状态[0-不显示；1-显示]
      */
+    @NotNull(groups = {AddGroup.class, UpdateStatusGroup.class})
+    @ListValue(vals = {0, 1}, groups = {AddGroup.class, UpdateStatusGroup.class})
     private Integer showStatus;
     /**
      * 检索首字母
      */
-    @Pattern(regexp = "/^[a-zA-Z]$/", message = "检索首字母必须是一个字母", groups = {AddGroup.class, UpdateGroup.class})
+    @Pattern(regexp = "^[a-zA-Z]$", message = "检索首字母必须是一个字母", groups = {AddGroup.class, UpdateGroup.class})
     @NotEmpty(groups = {AddGroup.class})
     private String firstLetter;
     /**
