@@ -4,6 +4,8 @@ package com.example.gulimall.product;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.example.gulimall.product.entity.BrandEntity;
 import com.example.gulimall.product.service.BrandService;
+import com.example.gulimall.product.service.CategoryService;
+import lombok.extern.slf4j.Slf4j;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,6 +15,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.InputStream;
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -20,12 +23,21 @@ import java.util.List;
  * 2、配置Key，endpoint相关信息
  * 3、使用OSSClient进行相关操作
  */
+@Slf4j
 @SpringBootTest
 @RunWith(SpringRunner.class)
 public class GulimallProductApplicationTests {
     @Autowired
     private BrandService brandService;
 
+    @Autowired
+    private CategoryService categoryService;
+
+    @Test
+    public void testFindPath(){
+        Long[] catelogPath = categoryService.findCatelogPath(225L);
+        log.info("完整路径: {}", Arrays.asList(catelogPath));
+    }
 
 
     @Test
