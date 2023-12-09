@@ -69,6 +69,10 @@ import java.util.Set;
  *      2、使用 @ExceptionHandler(value="具体的异常类型.class") 注解标注其中的方法， 【 返回值类型：R、 参数：具体的异常类型 】
  *  2）、对于常见的异常状态码以及提示消息，可以创建枚举类统一管理
  *
+ * 5、VO
+ *  作用：
+ *      接收页面传递来的数据，封装对象
+ *      将业务处理完的对象，封装成页面要用的数据
  */
 @SpringBootApplication
 @MapperScan("com.example.gulimall.product.dao")
