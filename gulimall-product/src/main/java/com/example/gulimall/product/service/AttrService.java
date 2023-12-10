@@ -6,6 +6,7 @@ import com.example.gulimall.product.entity.AttrEntity;
 import com.example.gulimall.product.vo.AttrRespVo;
 import com.example.gulimall.product.vo.AttrVo;
 
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -26,5 +27,12 @@ public interface AttrService extends IService<AttrEntity> {
     AttrRespVo getAttrInfo(Long attrId);
 
     void updateAttr(AttrVo attr);
+
+    /**
+     * 根据分组id找到组内关联的所有基本属性
+     * @param attrgroupId
+     * @return
+     */
+    List<AttrEntity> getRelationAttr(Long attrgroupId);
 }
 
