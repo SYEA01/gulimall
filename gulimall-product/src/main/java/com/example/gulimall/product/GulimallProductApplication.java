@@ -73,6 +73,10 @@ import java.util.Set;
  *  作用：
  *      接收页面传递来的数据，封装对象
  *      将业务处理完的对象，封装成页面要用的数据
+ *
+ * 6、Controller 只接收请求 和 接收和校验数据
+ *    Service 接收 Controller 传来的数据，进行业务处理
+ *    Controller 接收 Service 处理完的数据，封装成页面指定的Vo
  */
 @SpringBootApplication
 @MapperScan("com.example.gulimall.product.dao")
