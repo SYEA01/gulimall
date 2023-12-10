@@ -8,7 +8,6 @@ import com.example.gulimall.product.vo.AttrVo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
-import com.example.gulimall.product.entity.AttrEntity;
 import com.example.gulimall.product.service.AttrService;
 import com.example.common.utils.PageUtils;
 import com.example.common.utils.R;
@@ -30,8 +29,8 @@ public class AttrController {
     @GetMapping("/{attrType}/list/{catelogId}")
     public R baseAttrList(@RequestParam Map<String, Object> params,
                           @PathVariable("catelogId") Long catelogId,
-                          @PathVariable("attrType")String attyType) {
-        PageUtils page = attrService.queryBaseAttrPage(params, catelogId,attyType);
+                          @PathVariable("attrType") String attyType) {
+        PageUtils page = attrService.queryBaseAttrPage(params, catelogId, attyType);
         return R.ok().put("page", page);
     }
 
