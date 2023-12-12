@@ -1,6 +1,8 @@
 package com.example.gulimall.product.service.impl;
 
+import com.example.common.to.SpuBoundTo;
 import com.example.gulimall.product.entity.*;
+import com.example.gulimall.product.feign.CouponFeignService;
 import com.example.gulimall.product.service.*;
 import com.example.gulimall.product.vo.*;
 import org.springframework.beans.BeanUtils;
@@ -45,6 +47,9 @@ public class SpuInfoServiceImpl extends ServiceImpl<SpuInfoDao, SpuInfoEntity> i
 
     @Autowired
     SkuSaleAttrValueService skuSaleAttrValueService;
+
+    @Autowired
+    CouponFeignService couponFeignService;
 
 
     @Override
@@ -95,6 +100,11 @@ public class SpuInfoServiceImpl extends ServiceImpl<SpuInfoDao, SpuInfoEntity> i
         productAttrValueService.saveProductAttr(collect);
 
         // 5、保存spu的积分信息  sms_spu_bounds
+        Bounds bounds = vo.getBounds();
+        SpuBoundTo spuBoundTo = new SpuBoundTo();
+        BeanUtils.copyProperties(bounds,spuBoundTo);
+        spuBoundTo.setSpuId(spuId);
+        couponFeignService.saveSpuBounds(spuBoundTo);
 
         // 6、保存当前spu对应的所有sku信息
         List<Skus> skus = vo.getSkus();
@@ -138,7 +148,7 @@ public class SpuInfoServiceImpl extends ServiceImpl<SpuInfoDao, SpuInfoEntity> i
                 }).collect(Collectors.toList());
                 skuSaleAttrValueService.saveBatch(skuSaleAttrValueEntities);
 
-                // 6.4、保存sku的优惠满减等信息  sms_sku_ladder  \  sms_sku_full_reduction  \  sms_member_price  \
+                // 6.4、保存sku的优惠、满减等信息  sms_sku_ladder  \  sms_sku_full_reduction  \  sms_member_price  \
 
 
             });

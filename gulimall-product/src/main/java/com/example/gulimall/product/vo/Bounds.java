@@ -17,6 +17,12 @@ import java.math.BigDecimal;
 public class Bounds {
 
 
+    /**
+     * 购物积分
+     */
     private BigDecimal buyBounds;
+    /**
+     * 成长积分
+     */
     private BigDecimal growBounds;
 }

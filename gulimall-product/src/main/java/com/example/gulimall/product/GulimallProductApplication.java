@@ -5,6 +5,7 @@ import org.mybatis.spring.annotation.MapperScan;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.cloud.client.discovery.EnableDiscoveryClient;
+import org.springframework.cloud.openfeign.EnableFeignClients;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
@@ -77,10 +78,24 @@ import java.util.Set;
  * 6、Controller 只接收请求 和 接收和校验数据
  *    Service 接收 Controller 传来的数据，进行业务处理
  *    Controller 接收 Service 处理完的数据，封装成页面指定的Vo
+ *
+ * 7、To ： 不同服务之间传递的pojo 就是 To
+ *
+ * 8、feign 使用步骤
+ *  步骤：
+ *      1、将调用者 与 被调用者 都注册到注册中心中
+ *      2、在调用者的启动类中加上 @EnableFeignClients 注解
+ *      3、在调用者中创建接口，指定被调用者的完整方法签名 【 @FeignClient("gulimall-coupon")  // 调用哪个远程服务         】
+ *                                              【 public interface CouponFeignService {                      】
+ *                                              【                                                             】
+ *                                              【     @PostMapping("/coupon/spubounds/save")                    】
+ *                                              【     R saveSpuBounds(@RequestBody SpuBoundTo spuBoundTo);       】
+ *                                              【 }                                                             】
  */
 @SpringBootApplication
 @MapperScan("com.example.gulimall.product.dao")
 @EnableDiscoveryClient  // 开启服务的注册发现功能
+@EnableFeignClients(basePackages = "com.example.gulimall.product.feign")  // 开启远程调用。【 basePackages : 告诉feign接口在哪个包下面 】
 public class GulimallProductApplication {
 
     public static void main(String[] args) {
