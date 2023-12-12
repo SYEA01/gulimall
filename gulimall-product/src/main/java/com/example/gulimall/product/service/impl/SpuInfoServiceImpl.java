@@ -1,6 +1,8 @@
 package com.example.gulimall.product.service.impl;
 
+import com.example.common.to.SkuReductionTo;
 import com.example.common.to.SpuBoundTo;
+import com.example.common.utils.R;
 import com.example.gulimall.product.entity.*;
 import com.example.gulimall.product.feign.CouponFeignService;
 import com.example.gulimall.product.service.*;
@@ -102,7 +104,7 @@ public class SpuInfoServiceImpl extends ServiceImpl<SpuInfoDao, SpuInfoEntity> i
         // 5、保存spu的积分信息  sms_spu_bounds
         Bounds bounds = vo.getBounds();
         SpuBoundTo spuBoundTo = new SpuBoundTo();
-        BeanUtils.copyProperties(bounds,spuBoundTo);
+        BeanUtils.copyProperties(bounds, spuBoundTo);
         spuBoundTo.setSpuId(spuId);
         couponFeignService.saveSpuBounds(spuBoundTo);
 
@@ -149,11 +151,13 @@ public class SpuInfoServiceImpl extends ServiceImpl<SpuInfoDao, SpuInfoEntity> i
                 skuSaleAttrValueService.saveBatch(skuSaleAttrValueEntities);
 
                 // 6.4、保存sku的优惠、满减等信息  sms_sku_ladder  \  sms_sku_full_reduction  \  sms_member_price  \
-
+                SkuReductionTo skuReductionTo = new SkuReductionTo();
+                BeanUtils.copyProperties(sku, skuReductionTo);
+                skuReductionTo.setSkuId(skuId);
+                couponFeignService.saveSkuReduction(skuReductionTo);
 
             });
         }
-
 
 
     }
