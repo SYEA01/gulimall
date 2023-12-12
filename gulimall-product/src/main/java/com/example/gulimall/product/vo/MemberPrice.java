@@ -3,18 +3,23 @@
   */
 package com.example.gulimall.product.vo;
 
+import lombok.Data;
+
+import java.math.BigDecimal;
+
 /**
  * Auto-generated: 2023-12-12 0:20:18
  *
  * @author bejson.com (i@bejson.com)
  * @website http://www.bejson.com/java2pojo/
  */
+@Data
 public class MemberPrice {
 
     /**
      * 会员等级的id
      */
-    private int id;
+    private Long id;
     /**
      * 会员等级的名字
      */
@@ -22,26 +27,6 @@ public class MemberPrice {
     /**
      * 会员享受的价格
      */
-    private int price;
-    public void setId(int id) {
-         this.id = id;
-     }
-     public int getId() {
-         return id;
-     }
-
-    public void setName(String name) {
-         this.name = name;
-     }
-     public String getName() {
-         return name;
-     }
-
-    public void setPrice(int price) {
-         this.price = price;
-     }
-     public int getPrice() {
-         return price;
-     }
+    private BigDecimal price;
 
 }
