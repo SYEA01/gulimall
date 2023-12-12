@@ -1,11 +1,8 @@
 package com.example.gulimall.product.service.impl;
 
-import com.example.gulimall.product.entity.AttrEntity;
-import com.example.gulimall.product.entity.ProductAttrValueEntity;
-import com.example.gulimall.product.entity.SpuInfoDescEntity;
+import com.example.gulimall.product.entity.*;
 import com.example.gulimall.product.service.*;
-import com.example.gulimall.product.vo.BaseAttrs;
-import com.example.gulimall.product.vo.SpuSaveVo;
+import com.example.gulimall.product.vo.*;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -22,7 +19,6 @@ import com.example.common.utils.PageUtils;
 import com.example.common.utils.Query;
 
 import com.example.gulimall.product.dao.SpuInfoDao;
-import com.example.gulimall.product.entity.SpuInfoEntity;
 import org.springframework.transaction.annotation.Transactional;
 
 
@@ -40,6 +36,16 @@ public class SpuInfoServiceImpl extends ServiceImpl<SpuInfoDao, SpuInfoEntity> i
 
     @Autowired
     ProductAttrValueService productAttrValueService;
+
+    @Autowired
+    SkuInfoService skuInfoService;
+
+    @Autowired
+    SkuImagesService skuImagesService;
+
+    @Autowired
+    SkuSaleAttrValueService skuSaleAttrValueService;
+
 
     @Override
     public PageUtils queryPage(Map<String, Object> params) {
@@ -91,13 +97,54 @@ public class SpuInfoServiceImpl extends ServiceImpl<SpuInfoDao, SpuInfoEntity> i
         // 5、保存spu的积分信息  sms_spu_bounds
 
         // 6、保存当前spu对应的所有sku信息
-        // 6.1、保存sku的基本信息  pms_sku_info
+        List<Skus> skus = vo.getSkus();
+        if (skus != null && skus.size() > 0) {
+            skus.forEach(sku -> {
+                // 6.1、保存sku的基本信息  pms_sku_info
+                String defaultImg = "";
+                for (Images image : sku.getImages()) {
+                    if (image.getDefaultImg() == 1) {
+                        defaultImg = image.getImgUrl();
+                    }
+                }
 
-        // 6.2、保存sku的图片信息  pms_sku_images
+                SkuInfoEntity skuInfoEntity = new SkuInfoEntity();
+                BeanUtils.copyProperties(sku, skuInfoEntity);
+                skuInfoEntity.setBrandId(spuInfoEntity.getBrandId());
+                skuInfoEntity.setCatalogId(spuInfoEntity.getCatalogId());
+                skuInfoEntity.setSaleCount(0L);
+                skuInfoEntity.setSpuId(spuId);
+                skuInfoEntity.setSkuDefaultImg(defaultImg);
+                skuInfoService.saveSkuInfo(skuInfoEntity);
 
-        // 6.3、保存sku的销售属性信息  pms_sku_sale_attr_value
+                Long skuId = skuInfoEntity.getSkuId();
+                // 6.2、保存sku的图片信息  pms_sku_images
+                List<SkuImagesEntity> imagesEntities = sku.getImages().stream().map(img -> {
+                    SkuImagesEntity skuImagesEntity = new SkuImagesEntity();
+                    skuImagesEntity.setSkuId(skuId);
+                    skuImagesEntity.setImgUrl(img.getImgUrl());
+                    skuImagesEntity.setDefaultImg(img.getDefaultImg());
+                    return skuImagesEntity;
+                }).collect(Collectors.toList());
+                skuImagesService.saveBatch(imagesEntities);
 
-        // 6.4、保存sku的优惠满减等信息  sms_sku_ladder  \  sms_sku_full_reduction  \  sms_member_price  \
+                // 6.3、保存sku的销售属性信息  pms_sku_sale_attr_value
+                List<Attr> attrs = sku.getAttr();
+                List<SkuSaleAttrValueEntity> skuSaleAttrValueEntities = attrs.stream().map(attr -> {
+                    SkuSaleAttrValueEntity skuSaleAttrValueEntity = new SkuSaleAttrValueEntity();
+                    BeanUtils.copyProperties(attr, skuSaleAttrValueEntity);
+                    skuSaleAttrValueEntity.setSkuId(skuId);
+                    return skuSaleAttrValueEntity;
+                }).collect(Collectors.toList());
+                skuSaleAttrValueService.saveBatch(skuSaleAttrValueEntities);
+
+                // 6.4、保存sku的优惠满减等信息  sms_sku_ladder  \  sms_sku_full_reduction  \  sms_member_price  \
+
+
+            });
+        }
+
+
 
     }
 
