@@ -98,6 +98,9 @@ import java.util.Set;
  *  步骤：
  *      1、Edit Configurations...
  *      2、点击 + 号   --->   Compound    --->   依次把服务加进来
+ *
+ * 11、Spring中日期格式化
+ *  在application.yml 中配置： spring.jackson.data-format: yyyy-MM-dd HH:mm:ss
  */
 @SpringBootApplication
 @MapperScan("com.example.gulimall.product.dao")
