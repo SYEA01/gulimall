@@ -141,6 +141,7 @@ public class SpuInfoServiceImpl extends ServiceImpl<SpuInfoDao, SpuInfoEntity> i
                     skuImagesEntity.setDefaultImg(img.getDefaultImg());
                     return skuImagesEntity;
                 }).collect(Collectors.toList());
+                // TODO 没有图片路径的无需保存
                 skuImagesService.saveBatch(imagesEntities);
 
                 // 6.3、保存sku的销售属性信息  pms_sku_sale_attr_value
