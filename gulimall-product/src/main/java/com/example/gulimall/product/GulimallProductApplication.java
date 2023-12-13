@@ -91,6 +91,13 @@ import java.util.Set;
  *                                              【     @PostMapping("/coupon/spubounds/save")                    】
  *                                              【     R saveSpuBounds(@RequestBody SpuBoundTo spuBoundTo);       】
  *                                              【 }                                                             】
+ *
+ * 9、设置服务占用的最大内存  【 VM options   -Xmx100m 】
+ *
+ * 10、设置批量启动服务
+ *  步骤：
+ *      1、Edit Configurations...
+ *      2、点击 + 号   --->   Compound    --->   依次把服务加进来
  */
 @SpringBootApplication
 @MapperScan("com.example.gulimall.product.dao")
