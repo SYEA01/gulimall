@@ -9,6 +9,9 @@ spring:
       discovery:
         # Nacos注册中心的地址
         server-addr: 192.168.100.133:8848
+  jackson:
+    # 指定格式化的规则
+    date-format: yyyy-MM-dd HH:mm:ss
 
 
 
@@ -27,3 +30,4 @@ server:
 logging:
   level:
     com.example.gulimall: debug
+
