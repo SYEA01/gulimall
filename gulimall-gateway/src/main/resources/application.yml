@@ -22,7 +22,7 @@ spring:
             # 路径重写   【 将 /api/(?<segment>.*) 路径 自动重写成 /$\{segment} 路径  】
             - RewritePath=/api/(?<segment>.*),/$\{segment}
 
-        # 路由规则   【 只要发送 /api/product/** 格式的任意请求 ， 就会默认先路由到 gulimall-product 服务， 并且会把路径 /api/** 重写成 /**  】
+        # 路由规则   【 只要发送 /api/product/** 格式的任意请求 ， 就会默认先路由到 gulimall-member 服务， 并且会把路径 /api/** 重写成 /**  】
         - id: member_route
           # lb 代表负载均衡  【 lb://服务名 】
           uri: lb://gulimall-member
@@ -32,6 +32,18 @@ spring:
           filters:
             # 路径重写   【 将 /api/(?<segment>.*) 路径 自动重写成 /$\{segment} 路径  】
             - RewritePath=/api/(?<segment>.*),/$\{segment}
+
+        # 路由规则   【 只要发送 /api/product/** 格式的任意请求 ， 就会默认先路由到 gulimall-ware 服务， 并且会把路径 /api/** 重写成 /**  】
+        - id: ware_route
+          # lb 代表负载均衡  【 lb://服务名 】
+          uri: lb://gulimall-ware
+          predicates:
+            # 按照路径断言    前端项目，都加上 /api
+            - Path=/api/ware/**
+          filters:
+            # 路径重写   【 将 /api/(?<segment>.*) 路径 自动重写成 /$\{segment} 路径  】
+            - RewritePath=/api/(?<segment>.*),/$\{segment}
+
 
         - id: third_party_route
           uri: lb://gulimall-third-party
