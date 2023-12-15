@@ -101,6 +101,12 @@ import java.util.Set;
  *
  * 11、Spring中日期格式化
  *  在application.yml 中配置： spring.jackson.data-format: yyyy-MM-dd HH:mm:ss
+ *
+ * 12、整个事务出现异常后 无需回滚的两种方式
+ *  方式1： try  catch 掉异常
+ *      拿try包裹住可能发生异常的代码，catch中啥也不用干
+ *  方式2：  // todo 高级部分再说
+ *
  */
 @SpringBootApplication
 @MapperScan("com.example.gulimall.product.dao")
