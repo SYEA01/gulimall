@@ -8,8 +8,6 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 
 @SpringBootApplication
 @EnableDiscoveryClient  // 开启服务的注册发现功能
-@MapperScan("com.example.gulimall.ware.dao")  // 开启MyBatis注解扫描
-@EnableTransactionManagement  // 开启事务功能
 public class GulimallWareApplication {
 
     public static void main(String[] args) {
