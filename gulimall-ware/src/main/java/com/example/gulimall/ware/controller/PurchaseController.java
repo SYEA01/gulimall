@@ -2,6 +2,7 @@ package com.example.gulimall.ware.controller;
 
 import java.util.Arrays;
 import java.util.Date;
+import java.util.List;
 import java.util.Map;
 
 //import org.apache.shiro.authz.annotation.RequiresPermissions;
@@ -29,7 +30,18 @@ public class PurchaseController {
     private PurchaseService purchaseService;
 
     /**
+     * 領取采购单
+     */
+    @PostMapping("/received")
+    public R received(@RequestBody List<Long> ids) {
+        purchaseService.received(ids);
+        return R.ok();
+    }
+
+
+    /**
      * 合并采购单
+     *
      * @param mergeVo
      * @return
      */
