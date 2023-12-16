@@ -47,7 +47,7 @@ spring:
     nacos:
       discovery:
         # Nacos注册中心的地址
-        server-addr: 192.168.100.133:8848
+        server-addr: 192.168.100.135:8848
 #  resources:
 #    add-mappings: false
 
