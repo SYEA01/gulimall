@@ -74,7 +74,38 @@ public class GulimallSearchApplicationTests {
         private int age;
     }
 
-
+/**
+ * 1、方便检索 【优秀】
+ * {
+ *      // sku的基本信息
+ *     skuId:1
+ *     spuId:11
+ *     skuTitle:华为xxx
+ *     price:998
+ *     saleCount:99
+ *
+ *      // 检索属性
+ *     attrs:[
+ *          {尺寸: 5寸},
+ *          {CPU: 高通945},
+ *          {分辨率: 全高清}
+ *     ]
+ * }
+ * 2、
+ * sku索引 {
+ *     skuId:1
+ *     spuId:11
+ *     xxx
+ * }
+ * attrs索引{
+ *     spuId:11
+ *     attrs:[
+ *          {尺寸: 5寸},
+ *          {CPU: 高通945},
+ *          {分辨率: 全高清}
+ *     ]
+ * }
+ */
     /**
      * 测试检索功能
      */
