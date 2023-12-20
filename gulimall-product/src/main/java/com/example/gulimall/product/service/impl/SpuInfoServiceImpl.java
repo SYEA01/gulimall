@@ -13,10 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
@@ -225,18 +222,30 @@ public class SpuInfoServiceImpl extends ServiceImpl<SpuInfoDao, SpuInfoEntity> i
         List<SkuInfoEntity> skuInfoEntities = skuInfoService.getSkusBySpuId(spuId);
 
         // TODO 4、查询当前sku的所有可以被检索的规格属性，
+        List<ProductAttrValueEntity> baseAttrs = productAttrValueService.baseAttrListForSpu(spuId);
+        List<Long> attrIds = baseAttrs.stream().map(ProductAttrValueEntity::getAttrId).collect(Collectors.toList());
+        List<Long> searchAttrIds = attrService.selectSearchAttrIds(attrIds);
+        Set<Long> idSet = new HashSet<>(searchAttrIds);
+        List<SkuEsModel.Attrs> attrs = baseAttrs.stream().filter(attr ->
+                idSet.contains(attr.getAttrId())).map(item -> {
+            SkuEsModel.Attrs attrs1 = new SkuEsModel.Attrs();
+            BeanUtils.copyProperties(item, attrs1);
+            return attrs1;
+        }).collect(Collectors.toList());
+
 
         // 2、封装每个sku的信息
         // 上架的商品集合
         List<SkuEsModel> upProducts = skuInfoEntities.stream().map(sku -> {
             // 1、组装需要的数据
             SkuEsModel esModel = new SkuEsModel();
-            BeanUtils.copyProperties(sku,esModel);
+            BeanUtils.copyProperties(sku, esModel);
             esModel.setSkuPrice(sku.getPrice());
             esModel.setSkuImg(sku.getSkuDefaultImg());
             // TODO 1、发送远程调用，库存系统查询是否有库存
 
             // TODO 2、热度评分。0
+            esModel.setHotScore(0L);
 
             // TODO 3、查询品牌和分类的名字信息
             BrandEntity brand = brandService.getById(esModel.getBrandId());
@@ -246,7 +255,8 @@ public class SpuInfoServiceImpl extends ServiceImpl<SpuInfoDao, SpuInfoEntity> i
             CategoryEntity category = categoryService.getById(esModel.getCatalogId());
             esModel.setCatalogName(category.getName());
 
-
+            // 设置检索属性
+            esModel.setAttrs(attrs);
 
 
             return esModel;
