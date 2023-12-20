@@ -2,11 +2,13 @@ package com.example.gulimall.ware.service.impl;
 
 import com.example.common.utils.R;
 import com.example.gulimall.ware.feign.ProductFeignService;
+import com.example.gulimall.ware.vo.SkuHasStockVo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
@@ -60,11 +62,11 @@ public class WareSkuServiceImpl extends ServiceImpl<WareSkuDao, WareSkuEntity> i
             //
             try {
                 R info = productFeignService.info(skuId);
-                if (info.getCode()==0){
-                    Map<String,Object> skuInfo = (Map<String, Object>) info.get("skuInfo");
+                if (info.getCode() == 0) {
+                    Map<String, Object> skuInfo = (Map<String, Object>) info.get("skuInfo");
                     wareSkuEntity.setSkuName((String) skuInfo.get("skuName"));
                 }
-            }catch (Exception e){
+            } catch (Exception e) {
 
             }
 
@@ -73,6 +75,19 @@ public class WareSkuServiceImpl extends ServiceImpl<WareSkuDao, WareSkuEntity> i
             // 2、如果有了库存记录     更新
             this.baseMapper.addStock(skuId, wareId, skuNum);
         }
+    }
+
+    @Override
+    public List<SkuHasStockVo> getSkusHasStock(List<Long> skuIds) {
+        List<SkuHasStockVo> collect = skuIds.stream().map(skuId -> {
+            SkuHasStockVo vo = new SkuHasStockVo();
+            // 查询当前sku的总库存量  SELECT SUM(stock - stock_locked) FROM wms_ware_sku WHERE sku_id = ?;
+            long count = baseMapper.getSkuStock(skuId);
+            vo.setSkuId(skuId);
+            vo.setHasStock(count > 0);
+            return vo;
+        }).collect(Collectors.toList());
+        return collect;
     }
 
 }

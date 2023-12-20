@@ -1,11 +1,13 @@
 package com.example.gulimall.product.service.impl;
 
+import com.example.common.to.SkuHasStockTo;
 import com.example.common.to.SkuReductionTo;
 import com.example.common.to.SpuBoundTo;
 import com.example.common.to.es.SkuEsModel;
 import com.example.common.utils.R;
 import com.example.gulimall.product.entity.*;
 import com.example.gulimall.product.feign.CouponFeignService;
+import com.example.gulimall.product.feign.WareFeignService;
 import com.example.gulimall.product.service.*;
 import com.example.gulimall.product.vo.*;
 import org.springframework.beans.BeanUtils;
@@ -59,6 +61,9 @@ public class SpuInfoServiceImpl extends ServiceImpl<SpuInfoDao, SpuInfoEntity> i
 
     @Autowired
     CategoryService categoryService;
+
+    @Autowired
+    WareFeignService wareFeignService;
 
 
     @Override
@@ -233,7 +238,17 @@ public class SpuInfoServiceImpl extends ServiceImpl<SpuInfoDao, SpuInfoEntity> i
             return attrs1;
         }).collect(Collectors.toList());
 
+        // TODO 1、发送远程调用，库存系统查询是否有库存
+        List<Long> skuIds = skuInfoEntities.stream().map(SkuInfoEntity::getSkuId).collect(Collectors.toList());
+        Map<Long, Boolean> stockMap = null;
+        try {
+            R<List<SkuHasStockTo>> skusHasStock = wareFeignService.getSkusHasStock(skuIds);
+            stockMap = skusHasStock.getData().stream().collect(Collectors.toMap(SkuHasStockTo::getSkuId, SkuHasStockTo::getHasStock));
+        } catch (Exception e) {
+            log.error("库存服务查询异常：原因{}", e);
+        }
 
+        Map<Long, Boolean> finalStockMap = stockMap;
         // 2、封装每个sku的信息
         // 上架的商品集合
         List<SkuEsModel> upProducts = skuInfoEntities.stream().map(sku -> {
@@ -242,7 +257,12 @@ public class SpuInfoServiceImpl extends ServiceImpl<SpuInfoDao, SpuInfoEntity> i
             BeanUtils.copyProperties(sku, esModel);
             esModel.setSkuPrice(sku.getPrice());
             esModel.setSkuImg(sku.getSkuDefaultImg());
-            // TODO 1、发送远程调用，库存系统查询是否有库存
+            // 设置库存信息
+            if (finalStockMap == null) {
+                esModel.setHasStock(true);
+            } else {
+                esModel.setHasStock(finalStockMap.get(sku.getSkuId()));
+            }
 
             // TODO 2、热度评分。0
             esModel.setHotScore(0L);
