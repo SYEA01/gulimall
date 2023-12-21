@@ -228,8 +228,12 @@ public class SpuInfoServiceImpl extends ServiceImpl<SpuInfoDao, SpuInfoEntity> i
     @Override
     public void up(Long spuId) {
 
+
         // 1.1、查出当前spuId对应的所有sku信息，品牌的名字
         List<SkuInfoEntity> skuInfoEntities = skuInfoService.getSkusBySpuId(spuId);
+
+        // TODO 1、发送远程调用，库存系统查询是否有库存
+        List<Long> skuIds = skuInfoEntities.stream().map(SkuInfoEntity::getSkuId).collect(Collectors.toList());
 
         // TODO 4、查询当前sku的所有可以被检索的规格属性，
         List<ProductAttrValueEntity> baseAttrs = productAttrValueService.baseAttrListForSpu(spuId);
@@ -243,8 +247,7 @@ public class SpuInfoServiceImpl extends ServiceImpl<SpuInfoDao, SpuInfoEntity> i
             return attrs1;
         }).collect(Collectors.toList());
 
-        // TODO 1、发送远程调用，库存系统查询是否有库存
-        List<Long> skuIds = skuInfoEntities.stream().map(SkuInfoEntity::getSkuId).collect(Collectors.toList());
+
         Map<Long, Boolean> stockMap = null;
         try {
             R<List<SkuHasStockTo>> skusHasStock = wareFeignService.getSkusHasStock(skuIds);
@@ -297,6 +300,12 @@ public class SpuInfoServiceImpl extends ServiceImpl<SpuInfoDao, SpuInfoEntity> i
         } else {
             // 远程调用失败
             // TODO 7、重复调用？接口幂等性；重试机制？
+            // Feign调用流程
+            /**
+             * 1、构造请求数据，将对象转为json
+             * 2、发送请求，进行执行（执行成功会解码响应数据）
+             * 3、执行请求会有重试机制
+             */
 
         }
     }

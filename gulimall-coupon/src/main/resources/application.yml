@@ -7,9 +7,11 @@ spring:
   cloud:
     nacos:
       discovery:
-        server-addr: 192.168.100.135:8848  # nacos注册中心的地址
+        # nacos注册中心的地址
+        server-addr: 192.168.100.135:8848
   application:
-    name: gulimall-coupon  # 给这个服务起个名字 （这样Nacos注册中心就能发现这个服务了）
+    # 给这个服务起个名字 （这样Nacos注册中心就能发现这个服务了）
+    name: gulimall-coupon
 
 
 mybatis-plus:
