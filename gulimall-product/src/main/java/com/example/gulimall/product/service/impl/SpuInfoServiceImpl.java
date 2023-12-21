@@ -1,5 +1,6 @@
 package com.example.gulimall.product.service.impl;
 
+import com.example.common.constant.ProductConstant;
 import com.example.common.to.SkuHasStockTo;
 import com.example.common.to.SkuReductionTo;
 import com.example.common.to.SpuBoundTo;
@@ -7,6 +8,7 @@ import com.example.common.to.es.SkuEsModel;
 import com.example.common.utils.R;
 import com.example.gulimall.product.entity.*;
 import com.example.gulimall.product.feign.CouponFeignService;
+import com.example.gulimall.product.feign.SearchFeignService;
 import com.example.gulimall.product.feign.WareFeignService;
 import com.example.gulimall.product.service.*;
 import com.example.gulimall.product.vo.*;
@@ -64,6 +66,9 @@ public class SpuInfoServiceImpl extends ServiceImpl<SpuInfoDao, SpuInfoEntity> i
 
     @Autowired
     WareFeignService wareFeignService;
+
+    @Autowired
+    SearchFeignService searchFeignService;
 
 
     @Override
@@ -284,6 +289,16 @@ public class SpuInfoServiceImpl extends ServiceImpl<SpuInfoDao, SpuInfoEntity> i
 
 
         // TODO 5、将数据发送给ES进行保存；gulimall-search;
+        R r = searchFeignService.productStatusUp(upProducts);
+        if (r.getCode() == 0) {
+            // 远程调用成功
+            // TODO 6、修改当前spu的状态 改为已上架
+            this.baseMapper.updateSpuStatus(spuId, ProductConstant.StatusEnum.SPU_UP.getCode());
+        } else {
+            // 远程调用失败
+            // TODO 7、重复调用？接口幂等性；重试机制？
+
+        }
     }
 
 
