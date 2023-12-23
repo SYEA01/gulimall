@@ -113,6 +113,10 @@ import java.util.Set;
  *  2）、静态资源都放在static 文件夹下就可以按照路径直接访问
  *  3）、页面放在templates 下，直接访问
  *      SpringBoot访问项目的时候，默认会找index.html
+ *  4)、页面修改不重启服务器的情况下实时更新
+ *      1、引入SpringBoot中的dev-tools依赖
+ *      2、在配置类中关闭thymeleaf的缓存
+ *      3、修改完html页面后， 摁 Ctrl + F9
  *
  */
 @SpringBootApplication

@@ -40,5 +40,11 @@ public interface CategoryService extends IService<CategoryEntity> {
      * @param category
      */
     void updateCascade(CategoryEntity category);
+
+    /**
+     * 查出所有的 1级分类
+     * @return
+     */
+    List<CategoryEntity> getLevel1Categorys();
 }
 
