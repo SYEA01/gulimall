@@ -107,6 +107,13 @@ import java.util.Set;
  *      拿try包裹住可能发生异常的代码，catch中啥也不用干
  *  方式2：  // todo 高级部分再说
  *
+ *
+ * 13、模板引擎
+ *  1）、引入thymeleaf-starter依赖； 关闭了缓存
+ *  2）、静态资源都放在static 文件夹下就可以按照路径直接访问
+ *  3）、页面放在templates 下，直接访问
+ *      SpringBoot访问项目的时候，默认会找index.html
+ *
  */
 @SpringBootApplication
 @MapperScan("com.example.gulimall.product.dao")

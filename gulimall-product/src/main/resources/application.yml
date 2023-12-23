@@ -12,6 +12,10 @@ spring:
   jackson:
     # 指定格式化的规则
     date-format: yyyy-MM-dd HH:mm:ss
+  thymeleaf:
+    # 关闭thymeleaf 的缓存
+    cache: false
+
 
 
 
@@ -30,4 +34,6 @@ server:
 logging:
   level:
     com.example.gulimall: debug
+
+
 
