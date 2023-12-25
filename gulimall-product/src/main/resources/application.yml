@@ -13,8 +13,8 @@ spring:
     # 指定格式化的规则
     date-format: yyyy-MM-dd HH:mm:ss
   thymeleaf:
-    # 关闭thymeleaf 的缓存
-    cache: false
+    # 开启thymeleaf 的缓存
+    cache: true
 
 
 
@@ -33,7 +33,7 @@ server:
 # 调整日志级别
 logging:
   level:
-    com.example.gulimall: debug
+    com.example.gulimall: error
 
 
 
