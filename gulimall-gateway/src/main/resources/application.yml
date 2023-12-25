@@ -44,7 +44,6 @@ spring:
             # 路径重写   【 将 /api/(?<segment>.*) 路径 自动重写成 /$\{segment} 路径  】
             - RewritePath=/api/(?<segment>.*),/$\{segment}
 
-
         - id: third_party_route
           uri: lb://gulimall-third-party
           predicates:
@@ -64,6 +63,13 @@ spring:
             # 路径重写   【 将 /api/(?<segment>.*) 路径 自动重写成 /renren-fast/$\{segment} 路径  】
             - RewritePath=/api/(?<segment>.*),/renren-fast/$\{segment}
 
+
+
+        - id: gulimall_host_route
+          uri: lb://gulimall-product
+          predicates:
+            # 只要 请求体的Host中的值是 gulimall.com 就匹配到gulimall-product服务
+            - Host=**.gulimall.com,gulimall.com
 
 
 
