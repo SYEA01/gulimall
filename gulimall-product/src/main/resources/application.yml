@@ -13,8 +13,8 @@ spring:
     # 指定格式化的规则
     date-format: yyyy-MM-dd HH:mm:ss
   thymeleaf:
-    # 开启thymeleaf 的缓存
-    cache: true
+    # 开发期间关闭thymeleaf 的缓存
+    cache: false
 
 
 
