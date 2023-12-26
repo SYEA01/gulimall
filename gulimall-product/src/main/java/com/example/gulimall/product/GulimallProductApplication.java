@@ -118,6 +118,10 @@ import java.util.Set;
  *      2、在配置类中关闭thymeleaf的缓存
  *      3、修改完html页面后， 摁 Ctrl + F9
  *
+ * 14、整合redis
+ *  1）、引入 spring-boot-starter-data-redis 依赖
+ *  2）、简单配置redis的host等信息
+ *  3）、使用SpringBoot自动配置好的StringRedisTemplate 来操作redis
  */
 @SpringBootApplication
 @MapperScan("com.example.gulimall.product.dao")

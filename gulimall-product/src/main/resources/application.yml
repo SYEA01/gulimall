@@ -15,7 +15,9 @@ spring:
   thymeleaf:
     # 开发期间关闭thymeleaf 的缓存
     cache: true
-
+  redis:
+    host: 192.168.100.135
+    port: 6379
 
 
 

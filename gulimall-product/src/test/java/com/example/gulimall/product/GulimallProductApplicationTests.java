@@ -10,6 +10,8 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.data.redis.core.StringRedisTemplate;
+import org.springframework.data.redis.core.ValueOperations;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import java.io.FileInputStream;
@@ -17,6 +19,7 @@ import java.io.FileNotFoundException;
 import java.io.InputStream;
 import java.util.Arrays;
 import java.util.List;
+import java.util.UUID;
 
 /**
  * 1、引入oss-starter
@@ -33,8 +36,27 @@ public class GulimallProductApplicationTests {
     @Autowired
     private CategoryService categoryService;
 
+    /**
+     * 自动注入StringRedisTemplate，它的key和value都是String类型的
+     */
+    @Autowired
+    private StringRedisTemplate stringRedisTemplate;
+
     @Test
-    public void testFindPath(){
+    public void testStringRedisTemplate() {
+        ValueOperations<String, String> ops = stringRedisTemplate.opsForValue();
+
+        // 保存
+        ops.set("hello", "world_" + UUID.randomUUID().toString());
+
+        // 查询
+        String value = ops.get("hello");
+        System.out.println("value = " + value);
+    }
+
+
+    @Test
+    public void testFindPath() {
         Long[] catelogPath = categoryService.findCatelogPath(225L);
         log.info("完整路径: {}", Arrays.asList(catelogPath));
     }
