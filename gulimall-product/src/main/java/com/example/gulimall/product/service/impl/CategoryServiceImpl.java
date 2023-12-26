@@ -21,7 +21,7 @@ import java.util.stream.Collectors;
 @Service("categoryService")
 public class CategoryServiceImpl extends ServiceImpl<CategoryDao, CategoryEntity> implements CategoryService {
 
-    private Map<String, Object> cache = new HashMap<>();
+//    private Map<String, Object> cache = new HashMap<>();
 
 //    @Autowired
 //    CategoryDao categoryDao;
@@ -129,45 +129,46 @@ public class CategoryServiceImpl extends ServiceImpl<CategoryDao, CategoryEntity
     @Override
     public Map<String, List<Catelog2Vo>> getCatalogJson() {
 
-        // 1、如果缓存中有，就用缓存的
-        Map<String, List<Catelog2Vo>> catalogJson = (Map<String, List<Catelog2Vo>>) cache.get("catalogJson");
-        if (catalogJson == null) {
-            /**
-             * 第一种优化：将数据库的多次查询变为一次
-             */
-            List<CategoryEntity> allList = baseMapper.selectList(null);
+//        // 1、如果缓存中有，就用缓存的
+//        Map<String, List<Catelog2Vo>> catalogJson = (Map<String, List<Catelog2Vo>>) cache.get("catalogJson");
+//        if (catalogJson == null) {
+//            // 调用业务，返回数据又放入缓存
+//            cache.put("catalogJson", map);
+//        }
+//        return catalogJson;
 
-            // 1、查出所有1级分类
-            List<CategoryEntity> level1Categorys = getParentCid(allList, 0L);
+        /**
+         * 第一种优化：将数据库的多次查询变为一次
+         */
+        List<CategoryEntity> allList = baseMapper.selectList(null);
 
-            // 2、封装数据
-            Map<String, List<Catelog2Vo>> map = level1Categorys.stream().collect(Collectors.toMap(key -> key.getCatId().toString(), value -> {
-                // 1、每一个的一级分类，查到这个一级分类的所有二级分类
-                List<CategoryEntity> category2List = getParentCid(allList, value.getParentCid());
-                // 2、封装上面的结果
-                List<Catelog2Vo> catelog2Vos = null;
-                if (category2List != null) {
-                    catelog2Vos = category2List.stream().map(c2 -> {
-                        // 1、找当前分类的三级分类封装成Vo
-                        List<CategoryEntity> category3List = getParentCid(allList, c2.getCatId());
-                        List<Catelog2Vo.Catelog3Vo> catelog3Vos = null;
-                        if (category3List != null) {
-                            catelog3Vos = category3List.stream().map(c3 -> {
-                                Catelog2Vo.Catelog3Vo catelog3Vo = new Catelog2Vo.Catelog3Vo(c2.getCatId().toString(), c3.getCatId().toString(), c3.getName());
-                                return catelog3Vo;
-                            }).collect(Collectors.toList());
-                        }
-                        Catelog2Vo catelog2Vo = new Catelog2Vo(value.getCatId().toString(), catelog3Vos, c2.getCatId().toString(), c2.getName());
-                        return catelog2Vo;
-                    }).collect(Collectors.toList());
-                }
-                return catelog2Vos;
-            }));
-            cache.put("catalogJson", map);
-            return map;
-        }
+        // 1、查出所有1级分类
+        List<CategoryEntity> level1Categorys = getParentCid(allList, 0L);
 
-        return catalogJson;
+        // 2、封装数据
+        Map<String, List<Catelog2Vo>> map = level1Categorys.stream().collect(Collectors.toMap(key -> key.getCatId().toString(), value -> {
+            // 1、每一个的一级分类，查到这个一级分类的所有二级分类
+            List<CategoryEntity> category2List = getParentCid(allList, value.getParentCid());
+            // 2、封装上面的结果
+            List<Catelog2Vo> catelog2Vos = null;
+            if (category2List != null) {
+                catelog2Vos = category2List.stream().map(c2 -> {
+                    // 1、找当前分类的三级分类封装成Vo
+                    List<CategoryEntity> category3List = getParentCid(allList, c2.getCatId());
+                    List<Catelog2Vo.Catelog3Vo> catelog3Vos = null;
+                    if (category3List != null) {
+                        catelog3Vos = category3List.stream().map(c3 -> {
+                            Catelog2Vo.Catelog3Vo catelog3Vo = new Catelog2Vo.Catelog3Vo(c2.getCatId().toString(), c3.getCatId().toString(), c3.getName());
+                            return catelog3Vo;
+                        }).collect(Collectors.toList());
+                    }
+                    Catelog2Vo catelog2Vo = new Catelog2Vo(value.getCatId().toString(), catelog3Vos, c2.getCatId().toString(), c2.getName());
+                    return catelog2Vo;
+                }).collect(Collectors.toList());
+            }
+            return catelog2Vos;
+        }));
+        return map;
     }
 
     private List<CategoryEntity> getParentCid(List<CategoryEntity> allList, Long parentCid) {
