@@ -22,6 +22,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 
@@ -146,6 +147,13 @@ public class CategoryServiceImpl extends ServiceImpl<CategoryDao, CategoryEntity
     public Map<String, List<Catelog2Vo>> getCatalogJson() {
         // 给缓存中放JSON字符串，拿出的JSON字符串还要逆转为能用的对象类型； 【 序列化与反序列化 】
 
+        /**
+         * 1、加上空结果缓存：解决缓存穿透问题
+         * 2、设置过期时间（加随机值）：解决缓存雪崩问题
+         * 3、加锁：解决缓存击穿问题
+         */
+
+
         // 1、加入缓存逻辑，缓存中存的数据是JSON字符串
         // JSON的好处：跨语言跨平台兼容
         String catalogJSON = redisTemplate.opsForValue().get("catalogJSON");
@@ -154,7 +162,8 @@ public class CategoryServiceImpl extends ServiceImpl<CategoryDao, CategoryEntity
             Map<String, List<Catelog2Vo>> catalogJsonFromDb = getCatalogJsonFromDb();
             // 3、将查到的数据再放入缓存,将对象转为JSON放到缓存中
             String jsonString = JSON.toJSONString(catalogJsonFromDb);
-            redisTemplate.opsForValue().set("catalogJSON", jsonString);
+//            redisTemplate.opsForValue().set("catalogJSON", jsonString);
+            redisTemplate.opsForValue().set("catalogJSON",jsonString,1, TimeUnit.DAYS);  // 缓存的过期时间 1天
             return catalogJsonFromDb;
         }
 
