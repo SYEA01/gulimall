@@ -122,6 +122,10 @@ import java.util.Set;
  *  1）、引入 spring-boot-starter-data-redis 依赖
  *  2）、简单配置redis的host等信息
  *  3）、使用SpringBoot自动配置好的StringRedisTemplate 来操作redis
+ *
+ *  lettuce 和 jedis 都是操作redis 的底层的客户端。Spring对他俩再次封装，封装成了RedisTemplate;
+ *
+ *
  */
 @SpringBootApplication
 @MapperScan("com.example.gulimall.product.dao")

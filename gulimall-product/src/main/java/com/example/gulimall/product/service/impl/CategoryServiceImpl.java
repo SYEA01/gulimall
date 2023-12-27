@@ -135,6 +135,13 @@ public class CategoryServiceImpl extends ServiceImpl<CategoryDao, CategoryEntity
         return entities;
     }
 
+    // TODO 产生堆外内存溢出：OutOfDirectMemoryError
+    // 1、SpringBoot2.0 默认使用lettuce作为操作Redis的客户端。lettuce使用netty进行网络通信。
+    // 2、主要原因是lettuce的bug 导致堆外内存溢出   -Xmx300m   netty如果没有指定堆外内存，默认使用 -Xmx300m 作为堆外内存
+    //  可以通过 -Dio.netty.maxDirectMemory 进行设置堆外内存
+    // 解决方案： 不能使用-Dio.netty.maxDirectMemory 只去调大堆外内存。
+    //  方案1：升级lettuce 客户端。  方案2：切换使用jedis作为操作Redis的客户端
+    //
     @Override
     public Map<String, List<Catelog2Vo>> getCatalogJson() {
         // 给缓存中放JSON字符串，拿出的JSON字符串还要逆转为能用的对象类型； 【 序列化与反序列化 】
