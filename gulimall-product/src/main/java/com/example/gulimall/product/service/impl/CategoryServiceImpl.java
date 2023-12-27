@@ -159,14 +159,13 @@ public class CategoryServiceImpl extends ServiceImpl<CategoryDao, CategoryEntity
         String catalogJSON = redisTemplate.opsForValue().get("catalogJSON");
         if (StringUtils.isEmpty(catalogJSON)) {
             // 2、缓存中没有，查询数据库
+            System.out.println("缓存不命中。。。。。。将要查询数据库。。。。。。");
             Map<String, List<Catelog2Vo>> catalogJsonFromDb = getCatalogJsonFromDb();
-            // 3、将查到的数据再放入缓存,将对象转为JSON放到缓存中
-            String jsonString = JSON.toJSONString(catalogJsonFromDb);
-//            redisTemplate.opsForValue().set("catalogJSON", jsonString);
-            redisTemplate.opsForValue().set("catalogJSON", jsonString, 1, TimeUnit.DAYS);  // 缓存的过期时间 1天
+
             return catalogJsonFromDb;
         }
 
+        System.out.println("缓存命中。。。。。。直接返回。。。。。。");
         // 把从缓存中查到的字符串转为指定的对象
         Map<String, List<Catelog2Vo>> result = JSON.parseObject(catalogJSON, new TypeReference<Map<String, List<Catelog2Vo>>>() {
         });
@@ -187,16 +186,19 @@ public class CategoryServiceImpl extends ServiceImpl<CategoryDao, CategoryEntity
 
         // 只要是同一把锁，就能锁住需要这个锁的所有线程
         // 1、synchronized (this) ：SpringBoot 所有的组件在容器中都是单例的，
+        // TODO 本地锁： synchronized、JUC（Lock） ； 在分布式情况下，想要锁住所有，就必须使用分布式锁
+
         synchronized (this) {
             // 得到锁以后，应该再去缓存中确定一次，如果没有 才需要继续查询
             String catalogJSON = redisTemplate.opsForValue().get("catalogJSON");
             if (!StringUtils.isEmpty(catalogJSON)) {
 
                 // 如果缓存不为空，直接返回
-                Map<String, List<Catelog2Vo>> result = JSON.parseObject(JSON.toJSONString(catalogJSON), new TypeReference<Map<String, List<Catelog2Vo>>>() {
+                Map<String, List<Catelog2Vo>> result = JSON.parseObject(catalogJSON, new TypeReference<Map<String, List<Catelog2Vo>>>() {
                 });
                 return result;
             }
+            System.out.println("查询了数据库。。。。。。");
 
             /**
              * 第一种优化：将数据库的多次查询变为一次
@@ -229,6 +231,10 @@ public class CategoryServiceImpl extends ServiceImpl<CategoryDao, CategoryEntity
                 }
                 return catelog2Vos;
             }));
+            // 3、将查到的数据再放入缓存,将对象转为JSON放到缓存中
+            String jsonString = JSON.toJSONString(catalogJSON);
+//            redisTemplate.opsForValue().set("catalogJSON", jsonString);
+            redisTemplate.opsForValue().set("catalogJSON", jsonString, 1, TimeUnit.DAYS);  // 缓存的过期时间 1天
             return map;
         }
     }
