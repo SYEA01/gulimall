@@ -125,6 +125,15 @@ import java.util.Set;
  *
  *  lettuce 和 jedis 都是操作redis 的底层的客户端。Spring对他俩再次封装，封装成了RedisTemplate;
  *
+ * 15、整合redisson作为分布式锁等功能的框架
+ *  1）、引入依赖
+ *         <dependency>
+ *             <groupId>org.redisson</groupId>
+ *             <artifactId>redisson</artifactId>
+ *             <version>3.12.0</version>
+ *         </dependency>
+ *
+ *  2）、配置redisson
  *
  */
 @SpringBootApplication
