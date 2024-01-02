@@ -4,8 +4,10 @@ import com.example.gulimall.product.entity.CategoryEntity;
 import com.example.gulimall.product.service.CategoryService;
 import com.example.gulimall.product.vo.Catelog2Vo;
 import org.redisson.api.RLock;
+import org.redisson.api.RReadWriteLock;
 import org.redisson.api.RedissonClient;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -13,6 +15,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -26,6 +29,9 @@ public class IndexController {
 
     @Autowired
     RedissonClient redisson;
+
+    @Autowired
+    StringRedisTemplate redisTemplate;
 
     /**
      * 配置不论输入 / 还是 /index.html 都会跳转到首页
@@ -87,6 +93,63 @@ public class IndexController {
             lock.unlock();
         }
         return "hello";
+    }
+
+    /**
+     * 测试读写锁
+     *
+     * 加读写锁的好处是：保证一定能读到最新数据 【 修改期间，写锁是一个排它锁（互斥锁），读锁是一个共享锁 】
+     * 只要写锁没释放，读就必须等待
+     *
+     * @return
+     */
+    @GetMapping("/write")
+    @ResponseBody
+    public String writeValue() {
+
+        // 创建读写锁
+        RReadWriteLock lock = redisson.getReadWriteLock("rw-lock");
+
+        RLock rLock = lock.writeLock();  // 写锁
+        String s = "";
+        try {
+            // 1、改数据加写锁，读数据加读锁
+            rLock.lock();  // 加锁
+
+            s = UUID.randomUUID().toString();
+            Thread.sleep(30 * 1000);  // 等待30秒
+            redisTemplate.opsForValue().set("writeValue", s);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        } finally {
+            rLock.unlock();  // 释放锁
+        }
+
+        return s;
+    }
+
+    /**
+     * 测试读写锁
+     *
+     * @return
+     */
+    @GetMapping("/read")
+    @ResponseBody
+    public String readValue() {
+        RReadWriteLock lock = redisson.getReadWriteLock("rw-lock");
+        RLock rLock = lock.readLock();  // 读锁
+
+        String s = "";
+        try {
+            rLock.lock();  // 加锁
+            s = redisTemplate.opsForValue().get("writeValue");
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            rLock.unlock();
+        }
+
+        return s;
     }
 
 }
