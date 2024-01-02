@@ -97,9 +97,16 @@ public class IndexController {
 
     /**
      * 测试读写锁
-     *
-     * 加读写锁的好处是：保证一定能读到最新数据 【 修改期间，写锁是一个排它锁（互斥锁），读锁是一个共享锁 】
+     * <p>
+     * 加读写锁的好处是：保证一定能读到最新数据 【 修改期间，写锁是一个排它锁（互斥锁、独享锁），读锁是一个共享锁 】
      * 只要写锁没释放，读就必须等待
+     * <p>
+     * 写 + 读 ： 读锁要等待写锁释放
+     * 写 + 写 ： 阻塞方式
+     * 读 + 写 ：写锁也要等待读锁释放
+     * 读 + 读 ： 相当于没有锁 【 并发读，只会在redis中记录好所有当前的读锁。它们都会同时加锁成功 】
+     * <p>
+     * 只要有写锁的存在，都必须等待
      *
      * @return
      */
@@ -115,6 +122,7 @@ public class IndexController {
         try {
             // 1、改数据加写锁，读数据加读锁
             rLock.lock();  // 加锁
+            System.out.println("写锁加锁成功。。。" + Thread.currentThread().getId());
 
             s = UUID.randomUUID().toString();
             Thread.sleep(30 * 1000);  // 等待30秒
@@ -123,6 +131,7 @@ public class IndexController {
             e.printStackTrace();
         } finally {
             rLock.unlock();  // 释放锁
+            System.out.println("写锁释放。。。" + Thread.currentThread().getId());
         }
 
         return s;
@@ -142,11 +151,16 @@ public class IndexController {
         String s = "";
         try {
             rLock.lock();  // 加锁
+            System.out.println("读锁加锁成功。。。" + Thread.currentThread().getId());
+
+
             s = redisTemplate.opsForValue().get("writeValue");
+            Thread.sleep(30 * 1000);  // 等待30秒
         } catch (Exception e) {
             e.printStackTrace();
         } finally {
             rLock.unlock();
+            System.out.println("读锁释放。。。" + Thread.currentThread().getId());
         }
 
         return s;
