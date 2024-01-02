@@ -3,15 +3,13 @@ package com.example.gulimall.product.web;
 import com.example.gulimall.product.entity.CategoryEntity;
 import com.example.gulimall.product.service.CategoryService;
 import com.example.gulimall.product.vo.Catelog2Vo;
-import org.redisson.api.RLock;
-import org.redisson.api.RReadWriteLock;
-import org.redisson.api.RSemaphore;
-import org.redisson.api.RedissonClient;
+import org.redisson.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import java.util.List;
@@ -195,6 +193,31 @@ public class IndexController {
         park.release();  // 释放一个信号，释放一个车位
 
         return "车开走 ok";
+    }
+
+
+    /**
+     * 闭锁测试
+     * 放假锁门
+     * 总共5个班级，全部走完了，就可以锁门
+     */
+    @GetMapping("/lockDoor")
+    @ResponseBody
+    public String lockDoor() throws InterruptedException {
+        RCountDownLatch door = redisson.getCountDownLatch("door");
+        door.trySetCount(5);  // 代表有5个班  // 在redis中创建一条数据   door : 5
+        door.await();  // 等待闭锁都完成    // 当redis中的 door变成0的时候就不阻塞了，否则就阻塞
+
+        return "放假啦。。。";
+    }
+
+    @GetMapping("/gogogo/{id}")
+    @ResponseBody
+    public String gogogo(@PathVariable("id") Long id) {
+        RCountDownLatch door = redisson.getCountDownLatch("door");
+        door.countDown();  // 计数 -1  闭锁
+
+        return id + "班的人都走了。。。";
     }
 
 
