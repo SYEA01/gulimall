@@ -140,8 +140,18 @@ public class CategoryServiceImpl extends ServiceImpl<CategoryDao, CategoryEntity
      *  2、代表当前方法的结果需要缓存，
      *      1）如果缓存中有，方法就不用调用了，直接从缓存中拿数据；
      *      2）如果缓存中没有，就查出真实数据（方法的结果）放到缓存中
+     *  3、@Cacheable 注解的默认行为
+     *      1）、如果缓存中有，方法就不用调用了，直接从缓存中拿数据；
+     *      2）、缓存的key默认格式    缓存的名字::SimpleKey []
+     *      3）、缓存的value的值     默认使用jdk序列化机制将序列化后的数据存到redis
+     *      4）、默认ttl时间是 -1  代表永不过期
+     *    自定义操作：
+     *      1）、指定生成的缓存使用的key  【 key属性，接收一个spEl表达式 】
+     *          spEl的详细语法：https://docs.spring.io/spring-framework/docs/5.3.31/reference/html/integration.html#cache-spel-context
+     *      2）、指定缓存的数据的存活时间  【 在配置文件中修改ttl  spring.cache.redis.time-to-live=3600000 】
+     *      3）、将数据保存为JSON格式  【  】
      */
-    @Cacheable(value = {"category"})
+    @Cacheable(value = {"category"},key = "#root.method.name")
     @Override
     public List<CategoryEntity> getLevel1Categorys() {
         System.out.println("CategoryServiceImpl.getLevel1Categorys");
