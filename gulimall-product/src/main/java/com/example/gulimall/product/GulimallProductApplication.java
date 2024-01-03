@@ -4,6 +4,7 @@ import com.example.common.valid.custom.ListValue;
 import org.mybatis.spring.annotation.MapperScan;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.cloud.client.discovery.EnableDiscoveryClient;
 import org.springframework.cloud.openfeign.EnableFeignClients;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -135,11 +136,35 @@ import java.util.Set;
  *
  *  2）、配置redisson
  *
+ * 16、整合SpringCache，简化缓存开发 【 使用redis作为缓存 】
+ * 1）、引入 `spring-boot-starter-cache` 依赖
+ *         <dependency>
+ *             <groupId>org.springframework.boot</groupId>
+ *             <artifactId>spring-boot-starter-cache</artifactId>
+ *         </dependency>
+ *         <dependency>
+ *             <groupId>org.springframework.boot</groupId>
+ *             <artifactId>spring-boot-starter-data-redis</artifactId>
+ *         </dependency>
+ * 2）、写配置
+ *  - 自动配置了哪些？  【 在 `CacheAutoConfiguration` 中 】
+ *       - 1、CacheAutoConfiguration 会导入 RedisCacheConfiguration；
+ *       - 2、RedisCacheConfiguration自动配好了CachaManager（缓存管理器）
+ *  - 我们需要配置哪些？
+ *       - 配置使用Redis作为缓存
+ *      # 缓存的类型 [ 配置使用Redis作为缓存 ]
+ *      spring.cache.type=redis
+ * 3）、测试使用缓存
+ *      3.1、开启缓存功能
+ * 在启动类上加上注解 `@EnableCaching  ` 开启缓存功能
+ *      3.2、只需要使用注解就能完成缓存操作  @Cacheable
  */
+
 @SpringBootApplication
 @MapperScan("com.example.gulimall.product.dao")
 @EnableDiscoveryClient  // 开启服务的注册发现功能
 @EnableFeignClients(basePackages = "com.example.gulimall.product.feign")  // 开启远程调用。【 basePackages : 告诉feign接口在哪个包下面 】
+@EnableCaching  // 开启缓存功能
 public class GulimallProductApplication {
 
     public static void main(String[] args) {

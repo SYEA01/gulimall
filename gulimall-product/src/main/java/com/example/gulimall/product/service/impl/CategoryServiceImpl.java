@@ -15,6 +15,7 @@ import com.example.gulimall.product.vo.Catelog2Vo;
 import org.redisson.api.RLock;
 import org.redisson.api.RedissonClient;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.data.redis.core.script.DefaultRedisScript;
 import org.springframework.stereotype.Service;
@@ -133,12 +134,21 @@ public class CategoryServiceImpl extends ServiceImpl<CategoryDao, CategoryEntity
         return paths;
     }
 
+
+    /**
+     *  1、每一个需要缓存的数据，都来指定要放到哪个名字的缓存 【 缓存的分区（按照业务类型分） 】
+     *  2、代表当前方法的结果需要缓存，
+     *      1）如果缓存中有，方法就不用调用了，直接从缓存中拿数据；
+     *      2）如果缓存中没有，就查出真实数据（方法的结果）放到缓存中
+     */
+    @Cacheable(value = {"category"})
     @Override
     public List<CategoryEntity> getLevel1Categorys() {
+        System.out.println("CategoryServiceImpl.getLevel1Categorys");
         long start = System.currentTimeMillis();
         List<CategoryEntity> entities = baseMapper.selectList(new QueryWrapper<CategoryEntity>().eq("parent_cid", 0));
         long end = System.currentTimeMillis();
-        System.out.println("消耗时间： " + (end - start));
+//        System.out.println("消耗时间： " + (end - start));
         return entities;
     }
 
@@ -182,8 +192,9 @@ public class CategoryServiceImpl extends ServiceImpl<CategoryDao, CategoryEntity
     /**
      * 缓存中的数据如何和数据库保持一致 【 缓存数据一致性问题 】
      * 场景：
-     *      1）、双写模式
-     *      2）、失效模式
+     * 1）、双写模式
+     * 2）、失效模式
+     *
      * @return
      */
     public Map<String, List<Catelog2Vo>> getCatalogJsonFromDbWithRedissonLock() {
