@@ -12,6 +12,8 @@ import com.example.gulimall.product.entity.CategoryEntity;
 import com.example.gulimall.product.service.CategoryBrandRelationService;
 import com.example.gulimall.product.service.CategoryService;
 import com.example.gulimall.product.vo.Catelog2Vo;
+import org.redisson.api.RLock;
+import org.redisson.api.RedissonClient;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.data.redis.core.script.DefaultRedisScript;
@@ -37,6 +39,9 @@ public class CategoryServiceImpl extends ServiceImpl<CategoryDao, CategoryEntity
 
     @Autowired
     private StringRedisTemplate redisTemplate;
+
+    @Autowired
+    private RedissonClient redisson;
 
     @Override
     public PageUtils queryPage(Map<String, Object> params) {
@@ -111,6 +116,9 @@ public class CategoryServiceImpl extends ServiceImpl<CategoryDao, CategoryEntity
     public void updateCascade(CategoryEntity category) {
         this.updateById(category);
         categoryBrandRelationService.updateCategory(category.getCatId(), category.getName());
+
+        // 双写模式：把数据库改完，同时修改缓存中的数据
+        // 失效模式：把数据库改完，同时删除缓存中的数据  redis.del("catalogJSON");  然后等待下一次查询的时候，主动更新
     }
 
 
@@ -171,6 +179,30 @@ public class CategoryServiceImpl extends ServiceImpl<CategoryDao, CategoryEntity
         return result;
     }
 
+    /**
+     * 缓存中的数据如何和数据库保持一致 【 缓存数据一致性问题 】
+     * 场景：
+     *      1）、双写模式
+     *      2）、失效模式
+     * @return
+     */
+    public Map<String, List<Catelog2Vo>> getCatalogJsonFromDbWithRedissonLock() {
+
+        // 1、锁的名字   锁的粒度越细越快；
+        // 约定：锁的粒度：具体缓存的是某个数据，  【 比如：11号商品： product-11-lock 】
+        RLock lock = redisson.getLock("catalogJson-lock");
+        lock.lock();
+
+        Map<String, List<Catelog2Vo>> dataFromDb;
+        try {
+            dataFromDb = getDataFromDb();
+        } finally {
+            lock.unlock();
+        }
+        return dataFromDb;
+
+
+    }
 
     public Map<String, List<Catelog2Vo>> getCatalogJsonFromDbWithRedisLock() {
 
