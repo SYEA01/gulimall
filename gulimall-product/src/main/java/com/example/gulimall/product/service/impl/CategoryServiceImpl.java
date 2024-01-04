@@ -17,6 +17,7 @@ import org.redisson.api.RedissonClient;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.annotation.Caching;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.data.redis.core.script.DefaultRedisScript;
 import org.springframework.stereotype.Service;
@@ -115,10 +116,24 @@ public class CategoryServiceImpl extends ServiceImpl<CategoryDao, CategoryEntity
 
     /**
      * @CacheEvict 缓存失效模式的使用 【 当有更新操作时，删除原来的缓存 】 ,指定区域value，指定key就是查询数据时的key，也就是方法名字
+     * <p>
+     * 同时进行多种缓存操作
+     * 方法1：同时进行多种缓存操作  @Caching(evict = {
+     * @CacheEvict(value = {"category"}, key = "'getLevel1Categorys'"),
+     * @CacheEvict(value = {"category"},key = "'getCatalogJson'")
+     * })
+     * 方法2：指定删除某个分区中的所有数据  @CacheEvict(value = "category",allEntries = true)  【 allEntries = true  删除category 分区中的所有数据 】
+     *
+     * 存储同一类型的数据，都可以指定成同一个分区。
      */
     @Transactional
     @Override
-    @CacheEvict(value = {"category"}, key = "'getLevel1Categorys'")  // 删除缓存
+//    @CacheEvict(value = {"category"}, key = "'getLevel1Categorys'")  // 删除缓存
+//    @Caching(evict = {
+//            @CacheEvict(value = {"category"}, key = "'getLevel1Categorys'"),
+//            @CacheEvict(value = {"category"},key = "'getCatalogJson'")
+//    })
+    @CacheEvict(value = "category", allEntries = true)
     public void updateCascade(CategoryEntity category) {
         this.updateById(category);
         categoryBrandRelationService.updateCategory(category.getCatId(), category.getName());
@@ -168,7 +183,7 @@ public class CategoryServiceImpl extends ServiceImpl<CategoryDao, CategoryEntity
     }
 
     @Override
-    @Cacheable(value = "category",key = "#root.method.name")
+    @Cacheable(value = "category", key = "#root.method.name")
     public Map<String, List<Catelog2Vo>> getCatalogJson() {
         System.out.println("查询了数据库...");
         List<CategoryEntity> allList = baseMapper.selectList(null);
