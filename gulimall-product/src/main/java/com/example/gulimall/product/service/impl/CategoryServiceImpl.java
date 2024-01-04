@@ -167,6 +167,39 @@ public class CategoryServiceImpl extends ServiceImpl<CategoryDao, CategoryEntity
         return entities;
     }
 
+    @Override
+    @Cacheable(value = "category",key = "#root.method.name")
+    public Map<String, List<Catelog2Vo>> getCatalogJson() {
+        System.out.println("查询了数据库...");
+        List<CategoryEntity> allList = baseMapper.selectList(null);
+        List<CategoryEntity> level1Categorys = getParentCid(allList, 0L);
+
+        // 2、封装数据
+        Map<String, List<Catelog2Vo>> map = level1Categorys.stream().collect(Collectors.toMap(key -> key.getCatId().toString(), value -> {
+            // 1、每一个的一级分类，查到这个一级分类的所有二级分类
+            List<CategoryEntity> category2List = getParentCid(allList, value.getParentCid());
+            // 2、封装上面的结果
+            List<Catelog2Vo> catelog2Vos = null;
+            if (category2List != null) {
+                catelog2Vos = category2List.stream().map(c2 -> {
+                    // 1、找当前分类的三级分类封装成Vo
+                    List<CategoryEntity> category3List = getParentCid(allList, c2.getCatId());
+                    List<Catelog2Vo.Catelog3Vo> catelog3Vos = null;
+                    if (category3List != null) {
+                        catelog3Vos = category3List.stream().map(c3 -> {
+                            Catelog2Vo.Catelog3Vo catelog3Vo = new Catelog2Vo.Catelog3Vo(c2.getCatId().toString(), c3.getCatId().toString(), c3.getName());
+                            return catelog3Vo;
+                        }).collect(Collectors.toList());
+                    }
+                    Catelog2Vo catelog2Vo = new Catelog2Vo(value.getCatId().toString(), catelog3Vos, c2.getCatId().toString(), c2.getName());
+                    return catelog2Vo;
+                }).collect(Collectors.toList());
+            }
+            return catelog2Vos;
+        }));
+        return map;
+    }
+
     // TODO 产生堆外内存溢出：OutOfDirectMemoryError
     // 1、SpringBoot2.0 默认使用lettuce作为操作Redis的客户端。lettuce使用netty进行网络通信。
     // 2、主要原因是lettuce的bug 导致堆外内存溢出   -Xmx300m   netty如果没有指定堆外内存，默认使用 -Xmx300m 作为堆外内存
@@ -174,8 +207,8 @@ public class CategoryServiceImpl extends ServiceImpl<CategoryDao, CategoryEntity
     // 解决方案： 不能使用-Dio.netty.maxDirectMemory 只去调大堆外内存。
     //  方案1：升级lettuce 客户端。  方案2：切换使用jedis作为操作Redis的客户端
     //
-    @Override
-    public Map<String, List<Catelog2Vo>> getCatalogJson() {
+//    @Override
+    public Map<String, List<Catelog2Vo>> getCatalogJson2() {
         // 给缓存中放JSON字符串，拿出的JSON字符串还要逆转为能用的对象类型； 【 序列化与反序列化 】
 
         /**
