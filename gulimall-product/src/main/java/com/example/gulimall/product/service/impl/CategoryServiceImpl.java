@@ -149,7 +149,8 @@ public class CategoryServiceImpl extends ServiceImpl<CategoryDao, CategoryEntity
      *      1）、指定生成的缓存使用的key  【 key属性，接收一个spEl表达式 】
      *          spEl的详细语法：https://docs.spring.io/spring-framework/docs/5.3.31/reference/html/integration.html#cache-spel-context
      *      2）、指定缓存的数据的存活时间  【 在配置文件中修改ttl  spring.cache.redis.time-to-live=3600000 】
-     *      3）、将数据保存为JSON格式  【  】
+     *      3）、将数据保存为JSON格式 :
+     *
      */
     @Cacheable(value = {"category"},key = "#root.method.name")
     @Override

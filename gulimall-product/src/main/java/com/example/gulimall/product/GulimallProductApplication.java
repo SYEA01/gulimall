@@ -158,13 +158,20 @@ import java.util.Set;
  *      3.1、开启缓存功能
  * 在启动类上加上注解 `@EnableCaching  ` 开启缓存功能
  *      3.2、只需要使用注解就能完成缓存操作  @Cacheable
+ *
+ *  4）、原理：
+ *  缓存的自动配置（CacheAutoConfiguration）导入了RedisCacheConfiguration；
+ *      RedisCacheConfiguration注入了缓存管理器（RedisCacheManager）
+ *          缓存管理器会按照配置文件中配的缓存名字来 初始化所有的缓存；
+ *              每个初始化缓存决定使用什么配置
+ *                  如果redisConfiguration有就用，没有就用默认配置
+ *  所以想改缓存的配置，只需要给容器中放一个RedisCacheConfiguration即可，就会应用到当前缓存管理器（RedisCacheManager）管理的所有缓存分区中
  */
 
 @SpringBootApplication
 @MapperScan("com.example.gulimall.product.dao")
 @EnableDiscoveryClient  // 开启服务的注册发现功能
 @EnableFeignClients(basePackages = "com.example.gulimall.product.feign")  // 开启远程调用。【 basePackages : 告诉feign接口在哪个包下面 】
-@EnableCaching  // 开启缓存功能
 public class GulimallProductApplication {
 
     public static void main(String[] args) {
