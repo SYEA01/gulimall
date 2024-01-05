@@ -123,7 +123,7 @@ public class CategoryServiceImpl extends ServiceImpl<CategoryDao, CategoryEntity
      * @CacheEvict(value = {"category"},key = "'getCatalogJson'")
      * })
      * 方法2：指定删除某个分区中的所有数据  @CacheEvict(value = "category",allEntries = true)  【 allEntries = true  删除category 分区中的所有数据 】
-     *
+     * <p>
      * 存储同一类型的数据，都可以指定成同一个分区。
      */
     @Transactional
@@ -171,7 +171,7 @@ public class CategoryServiceImpl extends ServiceImpl<CategoryDao, CategoryEntity
      * 2）、指定缓存的数据的存活时间  【 在配置文件中修改ttl  spring.cache.redis.time-to-live=3600000 】
      * 3）、将数据保存为JSON格式 :
      */
-    @Cacheable(value = {"category"}, key = "#root.method.name")
+    @Cacheable(value = {"category"}, key = "#root.method.name", sync = true)
     @Override
     public List<CategoryEntity> getLevel1Categorys() {
         System.out.println("CategoryServiceImpl.getLevel1Categorys");

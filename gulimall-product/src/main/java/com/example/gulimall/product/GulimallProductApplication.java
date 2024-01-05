@@ -166,6 +166,26 @@ import java.util.Set;
  *              每个初始化缓存决定使用什么配置
  *                  如果redisConfiguration有就用，没有就用默认配置
  *  所以想改缓存的配置，只需要给容器中放一个RedisCacheConfiguration即可，就会应用到当前缓存管理器（RedisCacheManager）管理的所有缓存分区中
+ *
+ *  5）、SpringCache的不足
+ *      1、读模式：
+ *          缓存穿透：查询一个永不存在的数据。 解决：缓存空数据
+ *          缓存击穿：大量并发进来同时查询一个正好过期的数据。 解决：加锁  【 SpringCache默认是没有加锁的 （@Cacheable注解可以通过设置sync属性=true加锁） 】
+ *              @Cacheable(value = {"category"}, key = "#root.method.name", sync = true)
+ *          缓存雪崩：大量key同时过期。 解决：加随机时间；指定过期时间就行。
+ *      2、写模式：（缓存与数据库一致）
+ *          1、读写加锁。（适用于读多写少的系统）
+ *          2、引入Canal中间件。感知到MySQL的更新去更新缓存
+ *          3、读多写多的直接去数据库查询
+ *    原理：
+ *      SpringCache中有一个CacheManager缓存管理器；  【 比如RedisCacheManager 】
+ *      缓存管理器可以造出很多的缓存组件Cache；  【 比如RedisCache 】
+ *      缓存组件负责缓存的读写；
+ *    总结：
+ *      常规数据（读多写少，即时性和一致性要求不高的数据）可以使用SpringCache；写模式（只要缓存的数据有过期时间就足够了）
+ *      特殊数据：特殊设计
+ *
+ *
  */
 
 @SpringBootApplication
