@@ -29,7 +29,7 @@ public class SearchParam {
      * brandId  品牌id  brandId=1&brandId=2&brandId=3
      * attrs  属性  attrs=1_其他:安卓&attrs=2_5寸:6寸
      */
-    private Integer hasStock;  // 是否只显示有货
+    private Integer hasStock = 1;  // 是否只显示有货
     private String skuPrice;  // 价格区间查询
     private List<Long> brandId;  // 按照品牌id进行筛选（可以多选）
     private List<String> attrs;  // 按照属性筛选
