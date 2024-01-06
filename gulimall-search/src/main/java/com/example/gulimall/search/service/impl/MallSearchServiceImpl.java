@@ -15,6 +15,8 @@ import org.elasticsearch.index.query.NestedQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.index.query.RangeQueryBuilder;
 import org.elasticsearch.search.builder.SearchSourceBuilder;
+import org.elasticsearch.search.fetch.subphase.highlight.HighlightBuilder;
+import org.elasticsearch.search.sort.SortOrder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -108,7 +110,7 @@ public class MallSearchServiceImpl implements MallSearchService {
                 String attrId = split[0];  // 检索的属性id
                 String[] attrValues = split[1].split(":");  // 属性的值
                 nestedBoolQuery.must(QueryBuilders.termQuery("attrs.attrId", attrId));
-                nestedBoolQuery.must(QueryBuilders.termQuery("attrs.attrValue", attrValues));
+                nestedBoolQuery.must(QueryBuilders.termsQuery("attrs.attrValue", attrValues));
                 // 每一个NestedQueryBuilder 都必须放到最大的boolQueryBuilder中
                 NestedQueryBuilder nestedQuery = QueryBuilders.nestedQuery("attrs", nestedBoolQuery, ScoreMode.None);  // ScoreMode.None代表这个查询的结果不参与评分
                 boolQuery.filter(nestedQuery);
@@ -121,6 +123,31 @@ public class MallSearchServiceImpl implements MallSearchService {
         /**
          * 排序、分页、高亮
          */
+        // 2.1、排序
+        String sort = param.getSort();
+        if (!StringUtils.isEmpty(sort)) {
+            String[] split = sort.split("_");
+            String sortField = split[0];
+            String sortRules = split[1];
+            sourceBuilder.sort(sortField, "asc".equalsIgnoreCase(sortRules) ? SortOrder.ASC : SortOrder.DESC);
+        }
+
+        // 2.2、分页
+        Integer pageNum = param.getPageNum();
+        sourceBuilder.from((pageNum - 1) * EsConstant.PRODUCT_PAGESIZE);
+        sourceBuilder.size(EsConstant.PRODUCT_PAGESIZE);
+
+        // 2.3、高亮
+        if (!StringUtils.isEmpty(keyword)) {
+            HighlightBuilder highlightBuilder = new HighlightBuilder();
+            highlightBuilder.field("skuTitle");
+            highlightBuilder.preTags("<b style='color:red'>");
+            highlightBuilder.postTags("</b>");
+            sourceBuilder.highlighter(highlightBuilder);
+        }
+
+        System.out.println("构建的DSL: \n" + sourceBuilder.toString());
+
 
         /**
          * 聚合分析
