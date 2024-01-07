@@ -100,7 +100,9 @@ public class MallSearchServiceImpl implements MallSearchService {
         }
         // 1.2、filter过滤 - 按照是否拥有库存查询
         Integer hasStock = param.getHasStock();
-        boolQuery.filter(QueryBuilders.termQuery("hasStock", hasStock == 1));
+        if (param.getHasStock() != null) {
+            boolQuery.filter(QueryBuilders.termQuery("hasStock", hasStock == 1));
+        }
         // 1.2、filter过滤 - 按照价格区间查询
         String skuPrice = param.getSkuPrice();
         if (!StringUtils.isEmpty(skuPrice)) {
