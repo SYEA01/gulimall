@@ -96,7 +96,7 @@ public class MallSearchServiceImpl implements MallSearchService {
         // 1.2、filter过滤 - 按照品牌id查询
         List<Long> brandIds = param.getBrandId();
         if (brandIds != null && brandIds.size() > 0) {
-            boolQuery.filter(QueryBuilders.termQuery("brandId", brandIds));
+            boolQuery.filter(QueryBuilders.termsQuery("brandId", brandIds));
         }
         // 1.2、filter过滤 - 按照是否拥有库存查询
         Integer hasStock = param.getHasStock();
