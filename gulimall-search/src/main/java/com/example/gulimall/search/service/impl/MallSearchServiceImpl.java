@@ -14,6 +14,9 @@ import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.elasticsearch.index.query.NestedQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.index.query.RangeQueryBuilder;
+import org.elasticsearch.search.aggregations.AggregationBuilders;
+import org.elasticsearch.search.aggregations.bucket.nested.NestedAggregationBuilder;
+import org.elasticsearch.search.aggregations.bucket.terms.TermsAggregationBuilder;
 import org.elasticsearch.search.builder.SearchSourceBuilder;
 import org.elasticsearch.search.fetch.subphase.highlight.HighlightBuilder;
 import org.elasticsearch.search.sort.SortOrder;
@@ -146,12 +149,40 @@ public class MallSearchServiceImpl implements MallSearchService {
             sourceBuilder.highlighter(highlightBuilder);
         }
 
-        System.out.println("构建的DSL: \n" + sourceBuilder.toString());
 
 
         /**
          * 聚合分析
          */
+        // 品牌聚合
+        TermsAggregationBuilder brandAgg = AggregationBuilders.terms("brand_agg");
+        brandAgg.field("brandId").size(50);
+        // 品牌聚合的子聚合
+        brandAgg.subAggregation(AggregationBuilders.terms("brand_name_agg").field("brandName").size(1));
+        brandAgg.subAggregation(AggregationBuilders.terms("brand_img_agg").field("brandImg").size(1));
+        sourceBuilder.aggregation(brandAgg);
+
+        // 分类聚合
+        TermsAggregationBuilder catalogAgg = AggregationBuilders.terms("catalog_agg");
+        catalogAgg.field("catalogId").size(20);
+        // 分类聚合的子聚合
+        catalogAgg.subAggregation(AggregationBuilders.terms("catalog_name_agg").field("catalogName").size(1));
+        sourceBuilder.aggregation(catalogAgg);
+
+        // 属性聚合
+        NestedAggregationBuilder attrAgg = AggregationBuilders.nested("attr_agg", "attrs");
+        TermsAggregationBuilder attrIdAgg = AggregationBuilders.terms("attr_id_agg");
+        attrIdAgg.field("attrs.attrId");
+        // 聚合分析出当前attrId 对应的attrName
+        attrIdAgg.subAggregation(AggregationBuilders.terms("attr_name_agg").field("attrs.attrName").size(1));
+        // 聚合分析出当前attrId 对应的attrValue
+        attrIdAgg.subAggregation(AggregationBuilders.terms("attr_value_agg").field("attrs.attrValue").size(50));
+        attrAgg.subAggregation(attrIdAgg);
+        sourceBuilder.aggregation(attrAgg);
+
+        System.out.println("构建的DSL: \n" + sourceBuilder.toString());
+
+
 
         SearchRequest searchRequest = new SearchRequest(new String[]{EsConstant.PRODUCT_INDEX}, sourceBuilder);
         return searchRequest;
