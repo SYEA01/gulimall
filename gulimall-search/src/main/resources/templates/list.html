@@ -1060,10 +1060,19 @@
                 <div class="filter">
                     <!--综合排序-->
                     <div class="filter_top">
-                        <div class="filter_top_left">
-                            <a class="sort_a" sort="hotScore" href="/static/search/#">综合排序</a>
-                            <a class="sort_a" sort="saleCount" href="/static/search/#">销量</a>
-                            <a class="sort_a" sort="skuPrice" href="/static/search/#">价格</a>
+                        <div class="filter_top_left" th:with="p = ${param.sort}">
+                            <a th:class="${(!#strings.isEmpty(p) && #strings.startsWith(p,'hotScore') && #strings.endsWith(p,'desc')) ? 'sort_a desc' : 'sort_a'}"
+                               th:attr="style=${(#strings.isEmpty(p) || #strings.startsWith(p,'hotScore'))?'color: #fff;border-color: #e4393c;background: #e4393c':'color: #333;border-color: #ccc;background: #fff'}"
+                               sort="hotScore" href="/static/search/#">综合排序[[${(!#strings.isEmpty(p) && #strings.startsWith(p,'hotScore') &&
+                                #strings.endsWith(p,'desc')) ?'↑':'↓' }]]</a>
+                            <a th:class="${(!#strings.isEmpty(p) && #strings.startsWith(p,'saleCount') && #strings.endsWith(p,'desc')) ? 'sort_a desc' : 'sort_a'}"
+                               th:attr="style=${(!#strings.isEmpty(p) && #strings.startsWith(p,'saleCount'))?'color: #fff;border-color: #e4393c;background: #e4393c':'color: #333;border-color: #ccc;background: #fff'}"
+                               sort="saleCount" href="/static/search/#">销量[[${(!#strings.isEmpty(p) && #strings.startsWith(p,'saleCount') &&
+                                #strings.endsWith(p,'desc'))?'↑':'↓' }]]</a>
+                            <a tth:class="${(!#strings.isEmpty(p) && #strings.startsWith(p,'skuPrice') && #strings.endsWith(p,'desc')) ? 'sort_a desc' : 'sort_a'}"
+                               th:attr="style=${(!#strings.isEmpty(p) && #strings.startsWith(p,'skuPrice'))?'color: #fff;border-color: #e4393c;background: #e4393c':'color: #333;border-color: #ccc;background: #fff'}"
+                               sort="skuPrice" href="/static/search/#">价格[[${(!#strings.isEmpty(p) && #strings.startsWith(p,'skuPrice') &&
+                                #strings.endsWith(p,'desc'))?'↑':'↓' }]]</a>
                             <a class="sort_a" href="/static/search/#">评论分</a>
                             <a class="sort_a" href="/static/search/#">上架时间</a>
                         </div>
@@ -2082,18 +2091,23 @@
     $(".sort_a").click(function () {
         // 1、当前被点击的元素变为选中状态
         // 改变当前元素以及兄弟元素的样式
-        changeStyle(this);
+        // changeStyle(this);
+
+        $(this).toggleClass("desc");
 
         // 2、跳转到指定位置
         var sort = $(this).attr("sort");
         sort = $(this).hasClass("desc") ? sort + "_desc" : sort + "_asc";
         location.href = replaceParamVal(location.href, "sort", sort)
 
+        $(this).toggleClass("desc");
+
         // 禁用默认行为
         return false;
     });
 
     function changeStyle(ele) {
+        //
         $(".sort_a").css({"color": "#333", "border-color": "#ccc", "background": "#fff"});
         $(".sort_a").each(function () {
             var text = $(this).text().replace("↓", "").replace("↑", "");
