@@ -772,6 +772,11 @@
                 <a href="/static/search/#">游戏手机</a>
             </div>
         </div>
+        <div class="JD_ipone_one c">
+            <!--遍历面包屑功能-->
+            <a th:each="nav:${result.navs}" th:href="${nav.link}"><span th:text="${nav.navName}"></span>: <span
+                    th:text="${nav.navValue}"></span> x</a>
+        </div>
         <i><img src="/static/search/image/right-@1x.png" alt=""></i>
     </div>
 </div>
@@ -2052,7 +2057,7 @@
 
     function searchProducts(name, value) {
         // 原来的页面
-        location.href = replaceParamVal(location.href, "keyword", value);
+        location.href = replaceParamVal(location.href, name, value, true);
     }
 
     function searchByKeyword() {
