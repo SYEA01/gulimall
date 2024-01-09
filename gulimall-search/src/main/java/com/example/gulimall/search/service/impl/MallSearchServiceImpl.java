@@ -1,10 +1,14 @@
 package com.example.gulimall.search.service.impl;
 
 import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.TypeReference;
 import com.example.common.to.es.SkuEsModel;
+import com.example.common.utils.R;
 import com.example.gulimall.search.config.GulimallElasticSearchConfig;
 import com.example.gulimall.search.constant.EsConstant;
+import com.example.gulimall.search.feign.ProductFeignService;
 import com.example.gulimall.search.service.MallSearchService;
+import com.example.gulimall.search.vo.AttrResponseVo;
 import com.example.gulimall.search.vo.SearchParam;
 import com.example.gulimall.search.vo.SearchResult;
 import org.apache.commons.lang.StringUtils;
@@ -18,7 +22,6 @@ import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.index.query.RangeQueryBuilder;
 import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.SearchHits;
-import org.elasticsearch.search.aggregations.Aggregation;
 import org.elasticsearch.search.aggregations.AggregationBuilders;
 import org.elasticsearch.search.aggregations.bucket.MultiBucketsAggregation;
 import org.elasticsearch.search.aggregations.bucket.nested.NestedAggregationBuilder;
@@ -47,6 +50,9 @@ public class MallSearchServiceImpl implements MallSearchService {
 
     @Autowired
     private RestHighLevelClient client;
+
+    @Autowired
+    ProductFeignService productFeignService;
 
     // 去ES中进行检索
     @Override
@@ -286,6 +292,28 @@ public class MallSearchServiceImpl implements MallSearchService {
             pageNavs.add(i);
         }
         result.setPageNavs(pageNavs);
+
+        // 6、构建面包屑导航功能
+        List<SearchResult.NavVo> navVos = param.getAttrs().stream().map(attr -> {
+            // 1、分析每个attr传过来的查询参数值
+            SearchResult.NavVo navVo = new SearchResult.NavVo();
+            String[] s = attr.split("_");
+            navVo.setNavValue(s[1]);
+            R r = productFeignService.attrInfo(Long.parseLong(s[0]));
+            if (r.getCode() == 0) {
+                AttrResponseVo attrResponseVo = r.getData("attr", new TypeReference<AttrResponseVo>() {
+                });
+                String attrName = attrResponseVo.getAttrName();
+                navVo.setNavName(attrName);
+            } else {
+                navVo.setNavName(s[0]);
+            }
+
+            // 2、取消了这个面包屑以后，我们要跳转到哪个地方
+
+            return navVo;
+        }).collect(Collectors.toList());
+        result.setNavs(navVos);
 
         return result;
     }
