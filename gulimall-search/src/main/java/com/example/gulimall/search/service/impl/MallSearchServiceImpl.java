@@ -9,6 +9,7 @@ import com.example.gulimall.search.constant.EsConstant;
 import com.example.gulimall.search.feign.ProductFeignService;
 import com.example.gulimall.search.service.MallSearchService;
 import com.example.gulimall.search.vo.AttrResponseVo;
+import com.example.gulimall.search.vo.BrandVo;
 import com.example.gulimall.search.vo.SearchParam;
 import com.example.gulimall.search.vo.SearchResult;
 import org.apache.commons.lang.StringUtils;
@@ -235,6 +236,7 @@ public class MallSearchServiceImpl implements MallSearchService {
         }
         result.setProducts(esModels);
 
+
         // 2、当前所有商品涉及到的所有属性信息
         ParsedNested attrAgg = response.getAggregations().get("attr_agg");
         ParsedLongTerms attrIdAgg = attrAgg.getAggregations().get("attr_id_agg");
@@ -249,6 +251,7 @@ public class MallSearchServiceImpl implements MallSearchService {
             List<String> attrValue = ((ParsedStringTerms) bucket.getAggregations().get("attr_value_agg")).getBuckets()
                     .stream().map(MultiBucketsAggregation.Bucket::getKeyAsString).collect(Collectors.toList());
             attrVo.setAttrValue(attrValue);
+
             attrVos.add(attrVo);
         }
         result.setAttrs(attrVos);
@@ -303,6 +306,7 @@ public class MallSearchServiceImpl implements MallSearchService {
                 String[] s = attr.split("_");
                 navVo.setNavValue(s[1]);
                 R r = productFeignService.attrInfo(Long.parseLong(s[0]));
+                result.getAttrIds().add(Long.parseLong(s[0]));
                 if (r.getCode() == 0) {
                     AttrResponseVo attrResponseVo = r.getData("attr", new TypeReference<AttrResponseVo>() {
                     });
@@ -313,15 +317,7 @@ public class MallSearchServiceImpl implements MallSearchService {
                 }
 
                 // 2、取消了这个面包屑以后，我们要跳转到哪个地方。  将请求地址的url里面的当前条件置空
-                // 拿到所有的查询条件，去掉当前。
-                String encode = null;
-                try {
-                    encode = URLEncoder.encode(attr, "UTF-8");
-                    encode = encode.replace("+", "%20");  // 浏览器对空格的编码和Java不一样
-                } catch (UnsupportedEncodingException e) {
-                    e.printStackTrace();
-                }
-                String replace = param.get_queryString().replace("&attrs=" + encode, "");
+                String replace = replaceQueryString(param, attr, "attrs");
                 navVo.setLink("http://search.gulimall.com/list.html?" + replace);
 
                 return navVo;
@@ -329,7 +325,44 @@ public class MallSearchServiceImpl implements MallSearchService {
             result.setNavs(navVos);
         }
 
+        // 品牌、分类
+        if (param.getBrandId() != null && param.getBrandId().size() > 0) {
+            List<SearchResult.NavVo> navs = result.getNavs();
+            SearchResult.NavVo navVo = new SearchResult.NavVo();
+            navVo.setNavName("品牌");
+            // TODO 远程查询所有品牌
+            R r = productFeignService.brandsInfo(param.getBrandId());
+            if (r.getCode() == 0) {
+                List<BrandVo> brands = r.getData("brand", new TypeReference<List<BrandVo>>() {
+                });
+                StringBuffer buffer = new StringBuffer();
+                String replace = "";
+                for (BrandVo brand : brands) {
+                    buffer.append(brand.getName()).append(";");
+                    replace = replaceQueryString(param, brand.getBrandId() + "", "brandId");
+                }
+                navVo.setNavValue(buffer.toString());
+                navVo.setLink("http://search.gulimall.com/list.html?" + replace);
+            }
+            navs.add(navVo);
+        }
+
+        // TODO 分类：不需要导航取消
+
         return result;
+    }
+
+    private static String replaceQueryString(SearchParam param, String value, String key) {
+        // 拿到所有的查询条件，去掉当前。
+        String encode = null;
+        try {
+            encode = URLEncoder.encode(value, "UTF-8");
+            encode = encode.replace("+", "%20");  // 浏览器对空格的编码和Java不一样
+        } catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
+        }
+        String replace = param.get_queryString().replace("&" + key + "=" + encode, "");
+        return replace;
     }
 
 }
