@@ -1,13 +1,13 @@
 package com.example.gulimall.search.thread;
 
-import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.FutureTask;
+import java.util.concurrent.*;
 
 /**
  * 创建和初始化多线程的4种方式
  */
 public class ThreadTest {
+
+
     public static void main(String[] args) throws ExecutionException, InterruptedException {
         System.out.println("main...start...");
         /**
@@ -26,8 +26,22 @@ public class ThreadTest {
          *         Integer res = futureTask.get();
          *         System.out.println("res = " + res);
          *
-         * - 4）、线程池
+         * - 4）、线程池 【 * 】
+         *      给线程池直接提交任务。
+         *
+         * 区别：
+         *      1、2方式不能得到返回值。3可以得到返回值
+         *      1、2、3 都不能达到资源控制的效果
+         *      4 可以控制资源， 好处：性能稳定。
          */
+
+        // 当前系统中线程池只有一个，每个异步任务提交给线程池，让它自己去执行
+        ExecutorService executorService = Executors.newFixedThreadPool(10);
+
+        // executorService.execute(new Runnable01());
+        Future<Integer> future = executorService.submit(new Callable01());
+        Integer res = future.get();
+        System.out.println("res = " + res);
 
         System.out.println("main...end...");
 
