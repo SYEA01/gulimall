@@ -7,8 +7,33 @@ import java.util.concurrent.*;
  */
 public class ThreadTest {
 
+    public static ExecutorService executor = Executors.newFixedThreadPool(10);
 
     public static void main(String[] args) throws ExecutionException, InterruptedException {
+
+        System.out.println("main...start...");
+
+//        CompletableFuture<Void> future = CompletableFuture.runAsync(() -> {
+//            System.out.println("当前线程 : " + Thread.currentThread().getId());
+//            int i = 10 / 2;
+//            System.out.println("运行结果 ： " + i);
+//        }, executor);
+
+        CompletableFuture<Integer> future = CompletableFuture.supplyAsync(() -> {
+            System.out.println("当前线程 : " + Thread.currentThread().getId());
+            int i = 10 / 2;
+            System.out.println("运行结果 ： " + i);
+            return i;
+        }, executor);
+
+        System.out.println("future.get() = " + future.get());
+
+        System.out.println("main...end...");
+
+    }
+
+
+    public void thread(String[] args) throws ExecutionException, InterruptedException {
         System.out.println("main...start...");
         /**
          * - 1）、继承Thread
