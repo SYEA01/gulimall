@@ -38,6 +38,7 @@ public class ThreadTest {
          *      1、创建线程池
          *          方式1）、Executors 工具类
          *          方式2）、原生方式：ThreadPoolExecutor executor = new ThreadPoolExecutor()
+         *      2、Future：可以获取到异步结果
          *
          * 区别：
          *      1、2方式不能得到返回值。3可以得到返回值
