@@ -79,17 +79,45 @@ public class ThreadTest {
 //        }, executor);
 //        System.out.println("future.get() = " + future.get());
 
-        CompletableFuture<Integer> future = CompletableFuture.supplyAsync(() -> {
-            System.out.println("任务1当前线程：" + Thread.currentThread().getId());
-            int i = 10 / 4;
-            System.out.println("运行结果：" + i);
-            return i;
-        }, executor).thenApplyAsync((i) -> {
-            System.out.println("任务2启动了，这是任务1的返回结果：" + i);
-            return i + 100;
-        }, executor);
-        System.out.println("future.get() = " + future.get());
+//        CompletableFuture<Integer> future = CompletableFuture.supplyAsync(() -> {
+//            System.out.println("任务1当前线程：" + Thread.currentThread().getId());
+//            int i = 10 / 4;
+//            System.out.println("运行结果：" + i);
+//            return i;
+//        }, executor).thenApplyAsync((i) -> {
+//            System.out.println("任务2启动了，这是任务1的返回结果：" + i);
+//            return i + 100;
+//        }, executor);
+//        System.out.println("future.get() = " + future.get());
 
+
+        /**
+         * 两个都完成
+         */
+        CompletableFuture<Integer> future01 = CompletableFuture.supplyAsync(() -> {
+            System.out.println("任务1线程启动：" + Thread.currentThread().getId());
+            int i = 10 / 4;
+            System.out.println("任务1线程结束：");
+            return i;
+        }, executor);
+        CompletableFuture<String> future02 = CompletableFuture.supplyAsync(() -> {
+            System.out.println("任务2线程启动：" + Thread.currentThread().getId());
+            System.out.println("任务2线程结束：");
+            return "hello";
+        }, executor);
+
+//        future01.runAfterBothAsync(future02, () -> {
+//            System.out.println("任务3开始。。。");
+//        }, executor);
+
+//        future01.thenAcceptBothAsync(future02, (v1, v2) -> {
+//            System.out.println("任务3开始。。。之前的结果：" + v1 + " , " + v2);
+//        }, executor);
+
+//        CompletableFuture<String> future = future01.thenCombineAsync(future02, (v1, v2) -> {
+//            return v1 + ":" + v2 + " -> Haha";
+//        }, executor);
+//        System.out.println("future.get() = " + future.get());
 
         System.out.println("main...end...");
 
