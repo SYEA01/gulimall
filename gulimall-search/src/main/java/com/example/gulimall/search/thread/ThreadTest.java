@@ -118,39 +118,65 @@ public class ThreadTest {
 ////        }, executor);
 ////        System.out.println("future.get() = " + future.get());
 
-        /**
-         * 两个任务只要有一个完成，就执行任务3
-         */
-        CompletableFuture<Integer> future01 = CompletableFuture.supplyAsync(() -> {
-            System.out.println("任务1线程启动：" + Thread.currentThread().getId());
-            int i = 10 / 4;
-            System.out.println("任务1线程结束：");
-            return i;
+//        /**
+//         * 两个任务只要有一个完成，就执行任务3
+//         */
+//        CompletableFuture<Integer> future01 = CompletableFuture.supplyAsync(() -> {
+//            System.out.println("任务1线程启动：" + Thread.currentThread().getId());
+//            int i = 10 / 4;
+//            System.out.println("任务1线程结束：");
+//            return i;
+//        }, executor);
+//        CompletableFuture<Integer> future02 = CompletableFuture.supplyAsync(() -> {
+//            System.out.println("任务2线程启动：" + Thread.currentThread().getId());
+//            try {
+//                Thread.sleep(3000);
+//            } catch (InterruptedException e) {
+//                e.printStackTrace();
+//            }
+//            System.out.println("任务2线程结束：");
+//            return 222;
+//        }, executor);
+//
+////        future01.runAfterEitherAsync(future02, () -> {
+////            System.out.println("任务3开始执行");
+////        }, executor);
+//
+////        future01.acceptEitherAsync(future02, (res) -> {
+////            System.out.println("任务3开始执行，任务3之前的结果：" + res);
+////        }, executor);
+//
+////        CompletableFuture<Integer> future03 = future01.applyToEitherAsync(future02, (res) -> {
+////            System.out.println("任务3开始执行，任务3之前的结果：" + res);
+////            return res + 100;
+////        }, executor);
+////        System.out.println("future03.get() = " + future03.get());
+
+
+        CompletableFuture<String> futureImg = CompletableFuture.supplyAsync(() -> {
+            System.out.println("查询商品的图片信息");
+            return "hello.jpg";
         }, executor);
-        CompletableFuture<Integer> future02 = CompletableFuture.supplyAsync(() -> {
-            System.out.println("任务2线程启动：" + Thread.currentThread().getId());
+        CompletableFuture<String> futureAttr = CompletableFuture.supplyAsync(() -> {
+            System.out.println("查询商品的属性信息");
+            return "黑色 + 256G";
+        }, executor);
+        CompletableFuture<String> futureDesc = CompletableFuture.supplyAsync(() -> {
             try {
                 Thread.sleep(3000);
+                System.out.println("查询商品介绍");
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
-            System.out.println("任务2线程结束：");
-            return 222;
+            return "华为";
         }, executor);
 
-//        future01.runAfterEitherAsync(future02, () -> {
-//            System.out.println("任务3开始执行");
-//        }, executor);
+//        CompletableFuture<Void> future = CompletableFuture.allOf(futureImg, futureAttr, futureDesc);
+        CompletableFuture<Object> future = CompletableFuture.anyOf(futureImg, futureAttr, futureDesc);
+        future.get();  // 等待有一个结果完成
 
-//        future01.acceptEitherAsync(future02, (res) -> {
-//            System.out.println("任务3开始执行，任务3之前的结果：" + res);
-//        }, executor);
-
-        CompletableFuture<Integer> future03 = future01.applyToEitherAsync(future02, (res) -> {
-            System.out.println("任务3开始执行，任务3之前的结果：" + res);
-            return res + 100;
-        }, executor);
-        System.out.println("future03.get() = " + future03.get());
+        // 获取最先执行完成的任务的返回值
+        System.out.println("返回值：" + future.get());
 
         System.out.println("main...end...");
 
