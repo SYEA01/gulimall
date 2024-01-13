@@ -36,22 +36,60 @@ public class ThreadTest {
 //        //  如果出现异常，那么 exceptionally 方法的返回值，就是这里的返回值
 //        System.out.println("future.get() = " + future.get());
 
-        //handle方法  方法执行完成后的**处理**（无论是成功完成还是失败完成）
+//        //handle方法  方法执行完成后的**处理**（无论是成功完成还是失败完成）
+//        CompletableFuture<Integer> future = CompletableFuture.supplyAsync(() -> {
+//            System.out.println("当前线程：" + Thread.currentThread().getId());
+//            int i = 10 / 4;
+//            System.out.println("运行结果：" + i);
+//            return i;
+//        }, executor).handle((result, throwable) -> {
+//            if (result != null) {
+//                return result;
+//            }
+//            if (throwable != null) {
+//                return -1;
+//            }
+//            return 0;
+//        });
+//        System.out.println("future.get() = " + future.get());
+
+        /**
+         * 线程串行化
+         *  1）、thenRun：不能获取到上一步的执行结果，无返回值
+         *  2）、thenAccept：可以获取到上一步的执行结果，无返回值
+         *  3）、thenApply：可以获取到上一步的执行结果，并且有返回值
+         */
+//        CompletableFuture<Void> future = CompletableFuture.supplyAsync(() -> {
+//            System.out.println("任务1当前线程：" + Thread.currentThread().getId());
+//            int i = 10 / 4;
+//            System.out.println("运行结果：" + i);
+//            return i;
+//        }, executor).thenRunAsync(() -> {
+//            System.out.println("任务2启动了");
+//        }, executor);
+//        System.out.println("future.get() = " + future.get());
+
+//        CompletableFuture<Void> future = CompletableFuture.supplyAsync(() -> {
+//            System.out.println("任务1当前线程：" + Thread.currentThread().getId());
+//            int i = 10 / 4;
+//            System.out.println("运行结果：" + i);
+//            return i;
+//        }, executor).thenAcceptAsync((i) -> {
+//            System.out.println("任务2启动了，这是任务1的返回结果： " + i);
+//        }, executor);
+//        System.out.println("future.get() = " + future.get());
+
         CompletableFuture<Integer> future = CompletableFuture.supplyAsync(() -> {
-            System.out.println("当前线程：" + Thread.currentThread().getId());
+            System.out.println("任务1当前线程：" + Thread.currentThread().getId());
             int i = 10 / 4;
             System.out.println("运行结果：" + i);
             return i;
-        }, executor).handle((result, throwable) -> {
-            if (result != null) {
-                return result;
-            }
-            if (throwable != null) {
-                return -1;
-            }
-            return 0;
-        });
+        }, executor).thenApplyAsync((i) -> {
+            System.out.println("任务2启动了，这是任务1的返回结果：" + i);
+            return i + 100;
+        }, executor);
         System.out.println("future.get() = " + future.get());
+
 
         System.out.println("main...end...");
 
