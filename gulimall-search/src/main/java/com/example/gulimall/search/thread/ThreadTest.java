@@ -19,21 +19,40 @@ public class ThreadTest {
 //            System.out.println("运行结果 ： " + i);
 //        }, executor);
 
-        CompletableFuture<Integer> future = CompletableFuture.supplyAsync(() -> {
-            System.out.println("当前线程 : " + Thread.currentThread().getId());
-            int i = 10 / 0;
-            System.out.println("运行结果 ： " + i);
-            return i;
-        }, executor).whenComplete((res, exc) -> {
-            // 虽然能得到异常信息，但是没法修改返回数据 （类似于监听器）
-            System.out.println("异步任务成功完成了。。。结果是：" + res + " ; 异常是：" + exc);
-        }).exceptionally(throwable -> {
-            // 可以感知异常，同时返回默认值
-            return 10;
-        });
+//        // 完成回调与异常感知  （方法成功完成后的**感知**）
+//        CompletableFuture<Integer> future = CompletableFuture.supplyAsync(() -> {
+//            System.out.println("当前线程 : " + Thread.currentThread().getId());
+//            int i = 10 / 0;
+//            System.out.println("运行结果 ： " + i);
+//            return i;
+//        }, executor).whenComplete((res, exc) -> {
+//            // 虽然能得到异常信息，但是没法修改返回数据 （类似于监听器）
+//            System.out.println("异步任务成功完成了。。。结果是：" + res + " ; 异常是：" + exc);
+//        }).exceptionally(throwable -> {
+//            // 可以感知异常，同时返回默认值
+//            return 10;
+//        });
+//
+//        //  如果出现异常，那么 exceptionally 方法的返回值，就是这里的返回值
+//        System.out.println("future.get() = " + future.get());
 
-        //  如果出现异常，那么 exceptionally 方法的返回值，就是这里的返回值
+        //handle方法  方法执行完成后的**处理**（无论是成功完成还是失败完成）
+        CompletableFuture<Integer> future = CompletableFuture.supplyAsync(() -> {
+            System.out.println("当前线程：" + Thread.currentThread().getId());
+            int i = 10 / 4;
+            System.out.println("运行结果：" + i);
+            return i;
+        }, executor).handle((result, throwable) -> {
+            if (result != null) {
+                return result;
+            }
+            if (throwable != null) {
+                return -1;
+            }
+            return 0;
+        });
         System.out.println("future.get() = " + future.get());
+
         System.out.println("main...end...");
 
     }
