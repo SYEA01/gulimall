@@ -77,6 +77,11 @@ spring:
             # 只要 请求体的Host中的值是 search.gulimall.com 就匹配到gulimall-search服务
             - Host=search.gulimall.com
 
+        - id: gulimall_auth_route
+          uri: lb://gulimall-auth-server
+          predicates:
+            # 只要 请求体的Host中的值是 auth.gulimall.com 就匹配到gulimall-auth-server服务
+            - Host=auth.gulimall.com
 
 
 
