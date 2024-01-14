@@ -3,6 +3,7 @@ package com.example.gulimall.product.service;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.example.common.utils.PageUtils;
 import com.example.gulimall.product.entity.SkuInfoEntity;
+import com.example.gulimall.product.vo.SkuItemVo;
 
 import java.util.List;
 import java.util.Map;
@@ -20,6 +21,7 @@ public interface SkuInfoService extends IService<SkuInfoEntity> {
 
     /**
      * 保存sku的基本信息
+     *
      * @param skuInfoEntity
      */
     void saveSkuInfo(SkuInfoEntity skuInfoEntity);
@@ -28,9 +30,18 @@ public interface SkuInfoService extends IService<SkuInfoEntity> {
 
     /**
      * 查出当前spuId对应的所有sku信息
+     *
      * @param spuId
      * @return
      */
     List<SkuInfoEntity> getSkusBySpuId(Long spuId);
+
+    /**
+     * 根据skuId查询sku详情
+     *
+     * @param skuId
+     * @return
+     */
+    SkuItemVo item(Long skuId);
 }
 

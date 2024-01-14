@@ -1,5 +1,6 @@
 package com.example.gulimall.product.service.impl;
 
+import com.example.gulimall.product.vo.SkuItemVo;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
@@ -84,6 +85,23 @@ public class SkuInfoServiceImpl extends ServiceImpl<SkuInfoDao, SkuInfoEntity> i
     public List<SkuInfoEntity> getSkusBySpuId(Long spuId) {
         List<SkuInfoEntity> skuInfoEntities = this.list(new QueryWrapper<SkuInfoEntity>().eq("spu_id", spuId));
         return skuInfoEntities;
+    }
+
+    @Override
+    public SkuItemVo item(Long skuId) {
+        SkuItemVo skuItemVo = new SkuItemVo();
+
+        // 1、获取sku的基本信息  pms_sku_info表
+
+        // 2、获取sku的图片信息 pms_sku_images表
+
+        // 3、获取spu的销售属性组合
+
+        // 4、获取spu的介绍  pms_spu_info_desc表
+
+        // 5、获取spu的规格参数信息
+
+        return null;
     }
 
 }
