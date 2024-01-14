@@ -3,6 +3,8 @@ package com.example.gulimall.product.service.impl;
 import com.example.gulimall.product.entity.AttrEntity;
 import com.example.gulimall.product.service.AttrService;
 import com.example.gulimall.product.vo.AttrGroupWithAttrsVo;
+import com.example.gulimall.product.vo.SkuItemVo;
+import com.example.gulimall.product.vo.SpuItemAttrGroupVo;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -73,6 +75,14 @@ public class AttrGroupServiceImpl extends ServiceImpl<AttrGroupDao, AttrGroupEnt
             return attrGroupWithAttrsVo;
         }).collect(Collectors.toList());
         return collect;
+    }
+
+    @Override
+    public List<SpuItemAttrGroupVo> getAttrGroupWithAttrsBySpuId(Long spuId, Long catalogId) {
+        // 1、查出当前spu对应的所有属性的分组信息，以及当前分组下的所有属性对应的值
+        //   SELECT pav.spu_id,ag.attr_group_name,ag.attr_group_id,aar.attr_id,a.attr_name,pav.attr_value FROM pms_attr_group ag LEFT JOIN pmg_attr_attrgroup_relation aar ON ag.attr_group_id=aar.attr_group_id LEFT JOIN pms_attr a ON aar.attr_id=a.attr_id LEFT JOIN pms_product_attr_value pav ON pav.attr_id=a.attr_id WHERE ag.catelog_id = #{catalogId} AND pav.spu_id=#{spuId};
+        List<SpuItemAttrGroupVo> vos = this.getBaseMapper().getAttrGroupWithAttrsBySpuId(spuId, catalogId);
+        return vos;
     }
 
 }

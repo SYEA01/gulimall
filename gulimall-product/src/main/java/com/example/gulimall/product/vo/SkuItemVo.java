@@ -37,23 +37,5 @@ public class SkuItemVo {
         private List<String> attrValues;
     }
 
-    /**
-     * spu的规格参数信息
-     */
-    @Data
-    public static class SpuItemAttrGroupVo {
-        private String groupName;
-        private List<SpuBaseAttrVo> attrs;
-    }
-
-    /**
-     * spu的基本属性
-     */
-    @Data
-    public static class SpuBaseAttrVo {
-        private String attrName;
-        private String attrValues;
-    }
-
 
 }
