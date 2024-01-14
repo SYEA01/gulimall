@@ -185,7 +185,17 @@ import java.util.Set;
  *      常规数据（读多写少，即时性和一致性要求不高的数据）可以使用SpringCache；写模式（只要缓存的数据有过期时间就足够了）
  *      特殊数据：特殊设计
  *
- *
+ * 17、将线程池交给Spring进行管理
+ *  1）、编写配置类MyThreadConfig，使用@Configuration注解；将ThreadPoolExecutor交给Spring进行管理，使用@Bean注解
+ *  2）、编写自定义配置类ThreadPoolConfigProperties，使用@ConfigurationProperties(prefix = "gulimall.thread") 指定配置的前缀；使用@Component将这个类交给Spring进行管理；使用@Data注解引入getter、setter方法
+ *        - 既可以在ThreadPoolConfigProperties 类中使用@Component 注解
+ *        - 也可以在MyThreadConfig 类中使用@EnableConfigurationProperties(ThreadPoolConfigProperties.class) 注解
+ *  3）、加入依赖：        <dependency>   之后，在application.yml中就有自动提示了
+ *                         <groupId>org.springframework.boot</groupId>
+ *                         <artifactId>spring-boot-configuration-processor</artifactId>
+ *                         <optional>true</optional>
+ *                     </dependency>
+ *  4)、在application.yml进行配置
  */
 
 @SpringBootApplication

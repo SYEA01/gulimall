@@ -90,6 +90,13 @@
             <artifactId>spring-boot-starter-cache</artifactId>
         </dependency>
 
+        <!--元数据处理器，加了这个注解之后，在application.properties 或者 application.yml 中的自定义配置都有提示了-->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-configuration-processor</artifactId>
+            <optional>true</optional>
+        </dependency>
+
     </dependencies>
     <dependencyManagement>
         <dependencies>
