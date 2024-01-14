@@ -68,14 +68,15 @@ spring:
         - id: gulimall_host_route
           uri: lb://gulimall-product
           predicates:
-            # 只要 请求体的Host中的值是 gulimall.com 就匹配到gulimall-product服务
-            - Host=gulimall.com
+            # 只要 请求体的Host中的值是 gulimall.com 或者 item.gulimall.com 就匹配到gulimall-product服务
+            - Host=gulimall.com,item.gulimall.com
 
         - id: gulimall_search_route
           uri: lb://gulimall-search
           predicates:
-            # 只要 请求体的Host中的值是 gulimall.com 就匹配到gulimall-product服务
+            # 只要 请求体的Host中的值是 search.gulimall.com 就匹配到gulimall-search服务
             - Host=search.gulimall.com
+
 
 
 
