@@ -1311,23 +1311,36 @@
 
 <script>
     $(".sku_attr_value").click(function () {
-        // 1、先获取所有加了checked的属性
+        // 1、点击的元素添加上自定义的属性
+        let skus = new Array();
+        let curr = $(this).attr("skus").split(",");
 
-        // 2、取出它们的交集，得到skuId
+        $(this).parent().parent().find(".sku_attr_value").removeClass("checked");
+        $(this).addClass("checked");
+        changeCheckedStyle();
 
-        // 3、跳转
+        $("a[class='sku_attr_value checked']").each(function () {
+            skus.push($(this).attr("skus").split(","));
+        });
+
+        let filterEle = skus[0];
+        for (let i = 1; i < skus.length; i++) {
+            filterEle = $(filterEle).filter(skus[i])[0];
+        }
+
+        location.href = "http://item.gulimall.com/" + filterEle + ".html";
+
+        return false;
     });
 
     $(function () {
-        $(".sku_attr_value").parent().css({"border": "solid 1px #ccc"});
-        $("a[class='sku_attr_value checked']").parent().css({"border": "solid 1px red"});
-
+        changeCheckedStyle();
     });
 
-    // function changeCheckedStyle() {
-    //     $(".sku_attr_value").parent().css({"border": "solid 1px #ccc"});
-    //     $("a[class='sku_attr_value checked']").parent().css({"border": "solid 1px red"});
-    // };
+    function changeCheckedStyle() {
+        $(".sku_attr_value").parent().css({"border": "solid 1px #ccc"});
+        $("a[class='sku_attr_value checked']").parent().css({"border": "solid 1px red"});
+    };
 
 </script>
 
