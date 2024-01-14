@@ -1,29 +1,25 @@
 package com.example.gulimall.product.service.impl;
 
-import com.example.gulimall.product.entity.SkuImagesEntity;
-import com.example.gulimall.product.entity.SpuInfoDescEntity;
-import com.example.gulimall.product.service.AttrGroupService;
-import com.example.gulimall.product.service.SkuImagesService;
-import com.example.gulimall.product.service.SpuInfoDescService;
-import com.example.gulimall.product.vo.SkuItemVo;
-import com.example.gulimall.product.vo.SpuItemAttrGroupVo;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-
-import java.math.BigDecimal;
-import java.util.List;
-import java.util.Map;
-
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.example.common.utils.PageUtils;
 import com.example.common.utils.Query;
-
 import com.example.gulimall.product.dao.SkuInfoDao;
+import com.example.gulimall.product.entity.SkuImagesEntity;
 import com.example.gulimall.product.entity.SkuInfoEntity;
-import com.example.gulimall.product.service.SkuInfoService;
+import com.example.gulimall.product.entity.SpuInfoDescEntity;
+import com.example.gulimall.product.service.*;
+import com.example.gulimall.product.vo.SkuItemSaleAttrVo;
+import com.example.gulimall.product.vo.SkuItemVo;
+import com.example.gulimall.product.vo.SpuItemAttrGroupVo;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
+
+import java.math.BigDecimal;
+import java.util.List;
+import java.util.Map;
 
 
 @Service("skuInfoService")
@@ -37,6 +33,9 @@ public class SkuInfoServiceImpl extends ServiceImpl<SkuInfoDao, SkuInfoEntity> i
 
     @Autowired
     AttrGroupService attrGroupService;
+
+    @Autowired
+    SkuSaleAttrValueService skuSaleAttrValueService;
 
     @Override
     public PageUtils queryPage(Map<String, Object> params) {
@@ -118,17 +117,18 @@ public class SkuInfoServiceImpl extends ServiceImpl<SkuInfoDao, SkuInfoEntity> i
         skuItemVo.setImages(images);
 
         // 3、获取spu的销售属性组合
-
+        List<SkuItemSaleAttrVo> saleAttrVos = skuSaleAttrValueService.getSaleAttrsBySpuId(spuId);
+        skuItemVo.setSaleAttr(saleAttrVos);
 
         // 4、获取spu的介绍  pms_spu_info_desc表
         SpuInfoDescEntity spuInfoDescEntity = spuInfoDescService.getById(spuId);
         skuItemVo.setDesc(spuInfoDescEntity);
 
         // 5、获取spu的规格参数信息
-        List<SpuItemAttrGroupVo> attrGroupVos = attrGroupService.getAttrGroupWithAttrsBySpuId(spuId,catalogId);
+        List<SpuItemAttrGroupVo> attrGroupVos = attrGroupService.getAttrGroupWithAttrsBySpuId(spuId, catalogId);
         skuItemVo.setGroupAttrs(attrGroupVos);
 
-        return null;
+        return skuItemVo;
     }
 
 }

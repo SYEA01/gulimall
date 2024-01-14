@@ -26,16 +26,4 @@ public class SkuItemVo {
 
     // 5、获取spu的规格参数信息
     private List<SpuItemAttrGroupVo> groupAttrs;
-
-    /**
-     * sku的销售属性
-     */
-    @Data
-    public static class SkuItemSaleAttrVo {
-        private Long attrId;
-        private String attrName;
-        private List<String> attrValues;
-    }
-
-
 }
