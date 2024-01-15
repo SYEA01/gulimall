@@ -3,6 +3,12 @@ spring:
     nacos:
       discovery:
         server-addr: 192.168.100.135:8848
+    alicloud:
+      sms:
+        host: https://dfsns.market.alicloudapi.com
+        path: /data/send_sms
+        template-id: CST_ptdie100
+        appcode: 96da6c1f643c42e2a654a1ad9b3be38e
 
   application:
     name: gulimall-third-party

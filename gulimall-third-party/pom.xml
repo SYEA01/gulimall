@@ -22,6 +22,14 @@
     </properties>
 
     <dependencies>
+
+        <!--yml提示-->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-configuration-processor</artifactId>
+            <optional>true</optional>
+        </dependency>
+
         <!--阿里云OSS对象存储-->
         <dependency>
             <groupId>com.alibaba.cloud</groupId>

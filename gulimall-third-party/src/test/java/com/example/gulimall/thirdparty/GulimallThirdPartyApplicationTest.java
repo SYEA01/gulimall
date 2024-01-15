@@ -1,5 +1,6 @@
 package com.example.gulimall.thirdparty;
 
+import com.example.gulimall.thirdparty.component.SmsComponent;
 import com.example.gulimall.thirdparty.util.HttpUtils;
 import org.apache.http.HttpResponse;
 import org.junit.Test;
@@ -23,8 +24,17 @@ public class GulimallThirdPartyApplicationTest {
     @Autowired
     OSSClient ossClient;
 
+    @Autowired
+    SmsComponent smsComponent;
+
     @Test
-    public void sendSms(){
+    public void sendCode() {
+        smsComponent.sendSmsCode("18199445947","159159");
+    }
+
+
+    @Test
+    public void sendSms() {
         String host = "https://dfsns.market.alicloudapi.com";
         String path = "/data/send_sms";
         String method = "POST";
