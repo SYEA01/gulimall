@@ -4,16 +4,25 @@ import com.example.common.constant.AuthServerConstant;
 import com.example.common.exception.BizCodeEnume;
 import com.example.common.utils.R;
 import com.example.gulimall.auth.feign.ThirdPartFeignService;
+import com.example.gulimall.auth.vo.UserRegistVo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.util.StringUtils;
+import org.springframework.validation.BindingResult;
+import org.springframework.validation.FieldError;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
-import java.util.UUID;
+import javax.validation.Valid;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 /**
  * @author taoao
@@ -31,6 +40,12 @@ public class LoginController {
     @Autowired
     StringRedisTemplate redisTemplate;
 
+    /**
+     * 获取短信验证码
+     *
+     * @param phone
+     * @return
+     */
     @ResponseBody
     @GetMapping("/sms/sendcode")
     public R sendCode(@RequestParam("phone") String phone) {
@@ -57,6 +72,35 @@ public class LoginController {
 
         thirdPartFeignService.sendCode(phone, code);
         return R.ok();
+    }
+
+    /**
+     * 注册
+     * // TODO 重定向携带数据：利用session原理，讲数据放在session中。
+     * 只要跳到下一个页面，取出这个数据以后，session里面的数据就会删掉
+     *
+     *  // TODO 1、分布式下的session问题。
+     * @param vo
+     * @param result
+     * @param redirectAttributes 用来模拟重定向视图时，带上数据
+     * @return
+     */
+    @PostMapping("/regist")
+    public String regist(@Valid UserRegistVo vo, BindingResult result, RedirectAttributes redirectAttributes) {
+        if (result.hasErrors()) {
+
+            Map<String, String> errors = result.getFieldErrors().stream().collect(Collectors.toMap(FieldError::getField, FieldError::getDefaultMessage));
+            redirectAttributes.addFlashAttribute("errors", errors);  // 重定向携带数据
+
+            // 校验出错，转发到注册页
+            return "redirect:http://auth.gulimall.com/reg.html";
+        }
+        // 真正注册，调用远程服务进行注册
+
+
+        // 注册成功，回到登录页
+        return "redirect:/login.html";
+
     }
 
 
