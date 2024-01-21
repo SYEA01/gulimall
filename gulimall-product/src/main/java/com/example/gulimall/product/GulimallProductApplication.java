@@ -196,6 +196,13 @@ import java.util.Set;
  *                         <optional>true</optional>
  *                     </dependency>
  *  4)、在application.yml进行配置
+ *
+ *  18、当service层需要给controller层返回异常数据时，但是service层的方法没有对应的返回值，可以使用异常机制
+ *      1）、自定义异常类，实现RuntimeException类；编写构造方法可以指定异常的具体内容
+ *      2）、在service层中，不符合要求的代码处，throw抛出自定义异常， throws进行声明
+ *      3）、在controller层中 通过try catch进行捕获处理
+ *
+ * 19、
  */
 
 @SpringBootApplication
