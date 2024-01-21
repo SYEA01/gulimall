@@ -1,6 +1,7 @@
 package com.example.gulimall.auth.feign;
 
 import com.example.common.utils.R;
+import com.example.gulimall.auth.vo.UserLoginVo;
 import com.example.gulimall.auth.vo.UserRegistVo;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -21,4 +22,13 @@ public interface MemberFeignService {
      */
     @PostMapping("/member/member/regist")
     R regist(@RequestBody UserRegistVo vo);
+
+    /**
+     * 远程登录功能
+     *
+     * @param vo
+     * @return
+     */
+    @PostMapping("/member/member/login")
+    R login(@RequestBody UserLoginVo vo);
 }
