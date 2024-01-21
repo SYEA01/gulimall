@@ -17,5 +17,12 @@
         <result property="note" column="note"/>
     </resultMap>
 
+    <!--查询默认的会员等级-->
+    <select id="getDefaultLevel" resultType="com.example.gulimall.member.entity.MemberLevelEntity">
+        SELECT *
+        FROM ums_member_level
+        WHERE default_status = 1;
+    </select>
+
 
 </mapper>

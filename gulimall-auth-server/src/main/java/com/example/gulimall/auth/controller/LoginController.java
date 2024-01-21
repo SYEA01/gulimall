@@ -78,8 +78,9 @@ public class LoginController {
      * 注册
      * // TODO 重定向携带数据：利用session原理，讲数据放在session中。
      * 只要跳到下一个页面，取出这个数据以后，session里面的数据就会删掉
+     * <p>
+     * // TODO 1、分布式下的session问题。
      *
-     *  // TODO 1、分布式下的session问题。
      * @param vo
      * @param result
      * @param redirectAttributes 用来模拟重定向视图时，带上数据
@@ -95,7 +96,29 @@ public class LoginController {
             // 校验出错，转发到注册页
             return "redirect:http://auth.gulimall.com/reg.html";
         }
-        // 真正注册，调用远程服务进行注册
+
+        // 1、 校验验证码
+        String code = vo.getCode();
+        String redisCode = redisTemplate.opsForValue().get(AuthServerConstant.SMS_CODE_CACHE_PREFIX + vo.getPhone());
+        if (!StringUtils.isEmpty(redisCode)) {
+            String s = redisCode.split("_")[0];
+            if (code.equals(s)) {
+                // 验证码通过。   删除验证码；令牌机制
+                redisTemplate.delete(AuthServerConstant.SMS_CODE_CACHE_PREFIX + vo.getPhone());
+                // 真正注册，调用远程服务进行注册
+
+            }else {
+                Map<String, String> errors = new HashMap<>();
+                errors.put("code", "验证码错误");
+                redirectAttributes.addFlashAttribute("errors", errors);
+                return "redirect:http://auth.gulimall.com/reg.html";
+            }
+        } else {  // 验证码过期了
+            Map<String, String> errors = new HashMap<>();
+            errors.put("code", "验证码错误");
+            redirectAttributes.addFlashAttribute("errors", errors);
+            return "redirect:http://auth.gulimall.com/reg.html";
+        }
 
 
         // 注册成功，回到登录页
