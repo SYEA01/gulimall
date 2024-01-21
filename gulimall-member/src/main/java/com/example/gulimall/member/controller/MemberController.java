@@ -4,6 +4,9 @@ import java.util.Arrays;
 import java.util.Map;
 
 //import org.apache.shiro.authz.annotation.RequiresPermissions;
+import com.example.common.exception.BizCodeEnume;
+import com.example.gulimall.member.exception.PhoneExistException;
+import com.example.gulimall.member.exception.UsernameExistException;
 import com.example.gulimall.member.feign.CouponFeignService;
 import com.example.gulimall.member.vo.MemberRegistVo;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,14 +36,17 @@ public class MemberController {
 
     /**
      * 注册
+     *
      * @return
      */
     @PostMapping("/regist")
-    public R regist(@RequestBody MemberRegistVo vo){
+    public R regist(@RequestBody MemberRegistVo vo) {
         try {
             memberService.regist(vo);
-        }catch (Exception e){
-
+        } catch (PhoneExistException e) {
+            return R.error(BizCodeEnume.PHONE_EXIST_EXCEPTION.getCode(), BizCodeEnume.PHONE_EXIST_EXCEPTION.getMessage());
+        } catch (UsernameExistException e) {
+            return R.error(BizCodeEnume.USER_EXIST_EXCEPTION.getCode(), BizCodeEnume.USER_EXIST_EXCEPTION.getMessage());
         }
         return R.ok();
     }
@@ -51,7 +57,7 @@ public class MemberController {
         MemberEntity memberEntity = new MemberEntity();
         memberEntity.setNickname("张三");
         R membercoupons = couponFeignService.membercoupons();
-        return R.ok().put("member",memberEntity).put("coupons",membercoupons.get("coupons"));
+        return R.ok().put("member", memberEntity).put("coupons", membercoupons.get("coupons"));
     }
 
 

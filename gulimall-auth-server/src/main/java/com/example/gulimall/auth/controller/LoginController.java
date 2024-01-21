@@ -1,8 +1,10 @@
 package com.example.gulimall.auth.controller;
 
+import com.alibaba.fastjson.TypeReference;
 import com.example.common.constant.AuthServerConstant;
 import com.example.common.exception.BizCodeEnume;
 import com.example.common.utils.R;
+import com.example.gulimall.auth.feign.MemberFeignService;
 import com.example.gulimall.auth.feign.ThirdPartFeignService;
 import com.example.gulimall.auth.vo.UserRegistVo;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -36,6 +38,9 @@ public class LoginController {
 
     @Autowired
     ThirdPartFeignService thirdPartFeignService;
+
+    @Autowired
+    MemberFeignService memberFeignService;
 
     @Autowired
     StringRedisTemplate redisTemplate;
@@ -106,8 +111,19 @@ public class LoginController {
                 // 验证码通过。   删除验证码；令牌机制
                 redisTemplate.delete(AuthServerConstant.SMS_CODE_CACHE_PREFIX + vo.getPhone());
                 // 真正注册，调用远程服务进行注册
+                R r = memberFeignService.regist(vo);
+                if (r.getCode() == 0) {
+                    // 注册成功
+                    return "redirect:http://auth.gulimall.com/login.html";
+                } else {  // 失败
+                    Map<String, String> errors = new HashMap<>();
+                    errors.put("msg", r.getData(new TypeReference<String>() {
+                    }));
+                    redirectAttributes.addFlashAttribute("errors", errors);
+                    return "redirect:http://auth.gulimall.com/reg.html";
+                }
 
-            }else {
+            } else {
                 Map<String, String> errors = new HashMap<>();
                 errors.put("code", "验证码错误");
                 redirectAttributes.addFlashAttribute("errors", errors);
@@ -119,11 +135,6 @@ public class LoginController {
             redirectAttributes.addFlashAttribute("errors", errors);
             return "redirect:http://auth.gulimall.com/reg.html";
         }
-
-
-        // 注册成功，回到登录页
-        return "redirect:/login.html";
-
     }
 
 
