@@ -10,6 +10,7 @@ import com.example.gulimall.member.exception.UsernameExistException;
 import com.example.gulimall.member.feign.CouponFeignService;
 import com.example.gulimall.member.vo.MemberLoginVo;
 import com.example.gulimall.member.vo.MemberRegistVo;
+import com.example.gulimall.member.vo.SocialUser;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -34,6 +35,22 @@ public class MemberController {
     //注入
     @Autowired
     CouponFeignService couponFeignService;
+
+
+    /**
+     * 登录
+     *
+     * @param vo
+     * @return
+     */
+    @PostMapping("/oauth2/login")
+    public R oauthLogin(@RequestBody SocialUser vo) throws Exception {
+
+        MemberEntity entity = memberService.login(vo);
+
+        return null;
+
+    }
 
 
     /**

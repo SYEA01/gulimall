@@ -7,6 +7,7 @@ import com.example.gulimall.member.exception.PhoneExistException;
 import com.example.gulimall.member.exception.UsernameExistException;
 import com.example.gulimall.member.vo.MemberLoginVo;
 import com.example.gulimall.member.vo.MemberRegistVo;
+import com.example.gulimall.member.vo.SocialUser;
 
 import java.util.Map;
 
@@ -50,5 +51,12 @@ public interface MemberService extends IService<MemberEntity> {
      * @return
      */
     MemberEntity login(MemberLoginVo vo);
+
+    /**
+     * 社交登录
+     * @param vo
+     * @return
+     */
+    MemberEntity login(SocialUser vo) throws Exception;
 }
 
