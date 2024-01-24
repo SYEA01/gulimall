@@ -19,6 +19,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
+import javax.servlet.http.HttpSession;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -35,7 +36,7 @@ public class OAuth2Controller {
     MemberFeignService memberFeignService;
 
     @GetMapping("/oauth2.0/weibo/success")
-    public String weibo(@RequestParam("code") String code) throws Exception {
+    public String weibo(@RequestParam("code") String code, HttpSession session) throws Exception {
         // 1、根据code换取access_token
         Map<String, String> headers = new HashMap<>();
         Map<String, String> querys = new HashMap<>();
@@ -65,6 +66,13 @@ public class OAuth2Controller {
                 MemberRespVo data = r.getData("data", new TypeReference<MemberRespVo>() {
                 });
                 log.info("登录成功，用户：{}", data.toString());
+                // 1、第一次使用session；命令浏览器保存JSESSIONID的 cookie；
+                // 以后浏览器访问哪个网站，就会带上这个网站的cookie
+                // 子域之间：gulimall.com(父域名) 下面有：auth.gulimall.com、order.gulimall.com。。。。
+                // 在设置JSESSIONID的时候，即使是子域，它的作用域要作用到整个父域 直接使用 【 指定域名为父域名 】
+                //
+                session.setAttribute("loginUser", data);
+
                 // 2、登录成功就跳回首页
                 return "redirect:http://gulimall.com";
 
