@@ -2,13 +2,19 @@ package com.example.gulimall.auth.controller;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
+import com.alibaba.fastjson.TypeReference;
 import com.example.common.utils.HttpUtils;
+import com.example.common.utils.R;
+import com.example.gulimall.auth.feign.MemberFeignService;
+import com.example.gulimall.auth.vo.MemberRespVo;
 import com.example.gulimall.auth.vo.SocialGiteeUser;
 import com.example.gulimall.auth.vo.SocialUser;
 import com.example.gulimall.auth.vo.SocialWeiboUser;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.http.HttpResponse;
 import org.apache.http.util.EntityUtils;
 import org.springframework.beans.BeanUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -22,7 +28,11 @@ import java.util.Map;
  * @author taoao
  */
 @Controller
+@Slf4j
 public class OAuth2Controller {
+
+    @Autowired
+    MemberFeignService memberFeignService;
 
     @GetMapping("/oauth2.0/weibo/success")
     public String weibo(@RequestParam("code") String code) throws Exception {
@@ -50,14 +60,20 @@ public class OAuth2Controller {
             // 知道当前是哪个社交用户
             // 1）、当前用户如果是第一次进网站，就自动注册进来 （为当前社交用户生成会员信息账号，以后这个社交用户就对应指定的会员）
             // 判断这个社交用户 登录 或者 注册
+            R r = memberFeignService.oauthLogin(socialUser);
+            if (r.getCode() == 0) {
+                MemberRespVo data = r.getData("data", new TypeReference<MemberRespVo>() {
+                });
+                log.info("登录成功，用户：{}", data.toString());
+                // 2、登录成功就跳回首页
+                return "redirect:http://gulimall.com";
 
-
+            } else {
+                return "redirect:http://auth.gulimall.com/login.html";
+            }
         } else {
             return "redirect:http://auth.gulimall.com/login.html";
         }
-
-        // 2、登录成功就跳回首页
-        return "redirect:http://gulimall.com";
     }
 
 
@@ -96,13 +112,22 @@ public class OAuth2Controller {
 
             // 知道当前是哪个社交用户
             // 1）、当前用户如果是第一次进网站，就自动注册进来 （为当前社交用户生成会员信息账号，以后这个社交用户就对应指定的会员）
+            R r = memberFeignService.oauthLogin(socialUser);
+            if (r.getCode() == 0) {
+                MemberRespVo data = r.getData("data", new TypeReference<MemberRespVo>() {
+                });
+                log.info("登录成功，用户：{}", data);
 
+                // 2、登录成功就跳回首页
+                return "redirect:http://gulimall.com";
+            } else {
+                return "redirect:http://auth.gulimall.com/login.html";
 
+            }
         } else {
             return "redirect:http://auth.gulimall.com/login.html";
         }
 
-        // 2、登录成功就跳回首页
-        return "redirect:http://gulimall.com";
+
     }
 }

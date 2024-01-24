@@ -18,6 +18,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
@@ -155,6 +156,8 @@ public class MemberServiceImpl extends ServiceImpl<MemberDao, MemberEntity> impl
                         registerMember.setNickname(nickName);
                         registerMember.setGender("m".equals(gender) ? 1 : 0);
                     }
+                } else if ("gitee".equals(vo.getIdentification())) {
+                    registerMember.setNickname("gitee_" + UUID.randomUUID().toString().substring(0, 5));
                 }
             } catch (Exception ignored) {
             }

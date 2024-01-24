@@ -47,8 +47,11 @@ public class MemberController {
     public R oauthLogin(@RequestBody SocialUser vo) throws Exception {
 
         MemberEntity entity = memberService.login(vo);
-
-        return null;
+        if (entity != null) {
+            return R.ok().setData(entity);
+        } else {
+            return R.error(BizCodeEnume.LOGINACCT_PASSWORD_INVALID_EXCEPTION.getCode(), BizCodeEnume.LOGINACCT_PASSWORD_INVALID_EXCEPTION.getMessage());
+        }
 
     }
 
