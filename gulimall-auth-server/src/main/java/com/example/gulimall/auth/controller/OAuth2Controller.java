@@ -6,7 +6,7 @@ import com.alibaba.fastjson.TypeReference;
 import com.example.common.utils.HttpUtils;
 import com.example.common.utils.R;
 import com.example.gulimall.auth.feign.MemberFeignService;
-import com.example.gulimall.auth.vo.MemberRespVo;
+import com.example.common.vo.MemberRespVo;
 import com.example.gulimall.auth.vo.SocialGiteeUser;
 import com.example.gulimall.auth.vo.SocialUser;
 import com.example.gulimall.auth.vo.SocialWeiboUser;
@@ -70,7 +70,8 @@ public class OAuth2Controller {
                 // 以后浏览器访问哪个网站，就会带上这个网站的cookie
                 // 子域之间：gulimall.com(父域名) 下面有：auth.gulimall.com、order.gulimall.com。。。。
                 // 在设置JSESSIONID的时候，即使是子域，它的作用域要作用到整个父域 直接使用 【 指定域名为父域名 】
-                //
+                // TODO 1、默认发的令牌：  session=dasdnasjfbahs。  作用域是当前域 （解决子域session共享问题）
+                // TODO 2、使用JSON的序列化方式来序列化对象数据到redis中
                 session.setAttribute("loginUser", data);
 
                 // 2、登录成功就跳回首页

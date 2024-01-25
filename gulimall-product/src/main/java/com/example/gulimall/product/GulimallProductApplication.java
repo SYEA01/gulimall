@@ -7,6 +7,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.cloud.client.discovery.EnableDiscoveryClient;
 import org.springframework.cloud.openfeign.EnableFeignClients;
+import org.springframework.session.data.redis.config.annotation.web.http.EnableRedisHttpSession;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
@@ -209,6 +210,7 @@ import java.util.Set;
 @MapperScan("com.example.gulimall.product.dao")
 @EnableDiscoveryClient  // 开启服务的注册发现功能
 @EnableFeignClients(basePackages = "com.example.gulimall.product.feign")  // 开启远程调用。【 basePackages : 告诉feign接口在哪个包下面 】
+@EnableRedisHttpSession
 public class GulimallProductApplication {
 
     public static void main(String[] args) {

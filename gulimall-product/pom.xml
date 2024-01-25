@@ -97,6 +97,13 @@
             <optional>true</optional>
         </dependency>
 
+
+        <!--整合SpringSession完成Session共享的问题-->
+        <dependency>
+            <groupId>org.springframework.session</groupId>
+            <artifactId>spring-session-data-redis</artifactId>
+        </dependency>
+
     </dependencies>
     <dependencyManagement>
         <dependencies>
