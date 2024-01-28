@@ -100,7 +100,7 @@ public class MallSearchServiceImpl implements MallSearchService {
         // 1.2、filter过滤 - 按照三级分类id查询
         Long catalog3Id = param.getCatalog3Id();
         if (catalog3Id != null) {
-            boolQuery.filter(QueryBuilders.termQuery("catalog3Id", catalog3Id));
+            boolQuery.filter(QueryBuilders.termQuery("catalogId", catalog3Id));
         }
         // 1.2、filter过滤 - 按照品牌id查询
         List<Long> brandIds = param.getBrandId();

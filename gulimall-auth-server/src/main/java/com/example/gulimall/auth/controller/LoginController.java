@@ -4,6 +4,7 @@ import com.alibaba.fastjson.TypeReference;
 import com.example.common.constant.AuthServerConstant;
 import com.example.common.exception.BizCodeEnume;
 import com.example.common.utils.R;
+import com.example.common.vo.MemberRespVo;
 import com.example.gulimall.auth.feign.MemberFeignService;
 import com.example.gulimall.auth.feign.ThirdPartFeignService;
 import com.example.gulimall.auth.vo.UserLoginVo;
@@ -21,6 +22,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import javax.servlet.http.HttpSession;
 import javax.validation.Valid;
 import java.util.HashMap;
 import java.util.Map;
@@ -146,11 +148,14 @@ public class LoginController {
      * @return
      */
     @PostMapping("/login")
-    public String login(UserLoginVo vo, RedirectAttributes redirectAttributes) {
+    public String login(UserLoginVo vo, RedirectAttributes redirectAttributes, HttpSession session) {
         // 远程登录
         R login = memberFeignService.login(vo);
         if (login.getCode() == 0) {
-            // 登录成功
+            // 登录成功，将用户信息放到session中
+            MemberRespVo data = login.getData("data", new TypeReference<MemberRespVo>() {
+            });
+            session.setAttribute(AuthServerConstant.LOGIN_USER, data);
             return "redirect:http://gulimall.com";
         } else {
             // 失败
@@ -160,6 +165,18 @@ public class LoginController {
             redirectAttributes.addFlashAttribute("errors", errors);
 
             return "redirect:http://auth.gulimall.com/login.html";
+        }
+    }
+
+    @GetMapping("/login.html")
+    public String LoginPage(HttpSession session) {
+        // 如果登录过了,跳转到首页，如果没有登录过，就进行登录
+        Object loginUser = session.getAttribute(AuthServerConstant.LOGIN_USER);
+        if (loginUser == null) {
+            // 未登录
+            return "login";
+        } else {
+            return "redirect:http://gulimall.com";
         }
 
     }

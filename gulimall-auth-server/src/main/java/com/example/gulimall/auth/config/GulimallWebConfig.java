@@ -18,8 +18,8 @@ public class GulimallWebConfig implements WebMvcConfigurer {
      */
     @Override
     public void addViewControllers(ViewControllerRegistry registry) {
-        registry.addViewController("/login.html")  // 添加视图控制器：@GetMapping中的url
-                .setViewName("login");  // 逻辑视图的名字：Controller方法的返回值
+//        registry.addViewController("/login.html")  // 添加视图控制器：@GetMapping中的url
+//                .setViewName("login");  // 逻辑视图的名字：Controller方法的返回值
 
         registry.addViewController("/reg.html")
                 .setViewName("reg");

@@ -3,6 +3,7 @@ package com.example.gulimall.auth.controller;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.TypeReference;
+import com.example.common.constant.AuthServerConstant;
 import com.example.common.utils.HttpUtils;
 import com.example.common.utils.R;
 import com.example.gulimall.auth.feign.MemberFeignService;
@@ -72,7 +73,7 @@ public class OAuth2Controller {
                 // 在设置JSESSIONID的时候，即使是子域，它的作用域要作用到整个父域 直接使用 【 指定域名为父域名 】
                 // TODO 1、默认发的令牌：  session=dasdnasjfbahs。  作用域是当前域 （解决子域session共享问题）
                 // TODO 2、使用JSON的序列化方式来序列化对象数据到redis中
-                session.setAttribute("loginUser", data);
+                session.setAttribute(AuthServerConstant.LOGIN_USER, data);
 
                 // 2、登录成功就跳回首页
                 return "redirect:http://gulimall.com";
@@ -87,7 +88,7 @@ public class OAuth2Controller {
 
 
     @GetMapping("/oauth2.0/gitee/success")
-    public String gitee(@RequestParam("code") String code) throws Exception {
+    public String gitee(@RequestParam("code") String code, HttpSession session) throws Exception {
         // 1、根据code换取access_token
         Map<String, String> headers = new HashMap<>();
         Map<String, String> querys = new HashMap<>();
@@ -126,7 +127,7 @@ public class OAuth2Controller {
                 MemberRespVo data = r.getData("data", new TypeReference<MemberRespVo>() {
                 });
                 log.info("登录成功，用户：{}", data);
-
+                session.setAttribute(AuthServerConstant.LOGIN_USER, data);
                 // 2、登录成功就跳回首页
                 return "redirect:http://gulimall.com";
             } else {
