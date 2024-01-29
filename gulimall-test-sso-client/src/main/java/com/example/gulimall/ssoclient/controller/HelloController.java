@@ -1,8 +1,11 @@
 package com.example.gulimall.ssoclient.controller;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
@@ -18,6 +21,9 @@ public class HelloController {
 
     @Value("${sso.server.url}")
     String ssoServerUrl;
+
+    @Autowired
+    StringRedisTemplate redisTemplate;
 
     /**
      * 无需登录就可访问
@@ -36,7 +42,11 @@ public class HelloController {
      * @return
      */
     @GetMapping("/employees")
-    public String employees(Model model, HttpSession session) {
+    public String employees(Model model, HttpSession session, String uuid) {
+        if (!StringUtils.isEmpty(uuid)) {
+            session.setAttribute("loginUser", redisTemplate.opsForValue().get(uuid));
+        }
+
         Object user = session.getAttribute("loginUser");
         if (user == null) {
             // 没登录,跳转到登录服务器登录
