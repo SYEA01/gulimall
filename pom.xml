@@ -25,5 +25,6 @@
         <module>gulimall-auth-server</module>
         <module>gulimall-test-sso-server</module>
         <module>gulimall-test-sso-client</module>
+        <module>gulimall-test-sso-client2</module>
     </modules>
 </project>

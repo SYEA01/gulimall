@@ -43,7 +43,7 @@ public class HelloController {
      *
      * @return
      */
-    @GetMapping("/employees")
+    @GetMapping("/boss")
     public String employees(Model model, HttpSession session, String uuid) {
         if (!StringUtils.isEmpty(uuid)) {
 
@@ -58,7 +58,7 @@ public class HelloController {
         if (user == null) {
             // 没登录,跳转到登录服务器登录
 
-            return "redirect:" + ssoServerUrl + "?redirect_url=http://client1.com:8081/employees";
+            return "redirect:" + ssoServerUrl + "?redirect_url=http://client2.com:8082/boss";
         } else {
 
             List<String> emps = new ArrayList<>();
