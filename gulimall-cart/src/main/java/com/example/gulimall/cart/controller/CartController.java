@@ -1,18 +1,25 @@
 package com.example.gulimall.cart.controller;
 
-import com.example.common.constant.AuthServerConstant;
 import com.example.gulimall.cart.interceptor.CartInterceptor;
+import com.example.gulimall.cart.service.CartService;
 import com.example.gulimall.cart.to.UserInfoTo;
+import com.example.gulimall.cart.vo.CartItem;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 
-import javax.servlet.http.HttpSession;
+import java.util.concurrent.ExecutionException;
 
 /**
  * @author taoao
  */
 @Controller
 public class CartController {
+
+    @Autowired
+    CartService cartService;
 
     /**
      * 去购物车页面
@@ -38,11 +45,16 @@ public class CartController {
 
     /**
      * 添加商品到购物车
+     *
+     * @param skuId 商品skuId
+     * @param num   添加几件到购物车
      * @return
      */
     @GetMapping("/addToCart")
-    public String addToCart() {
-
+    public String addToCart(@RequestParam("skuId") Long skuId, @RequestParam("num") Integer num,
+                            Model model) throws ExecutionException, InterruptedException {
+        CartItem cartItem = cartService.addToCart(skuId, num);
+        model.addAttribute("item", cartItem);
         return "success";
     }
 

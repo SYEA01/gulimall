@@ -59,11 +59,13 @@
             </ul>
             <ul class="header_ul_right">
                 <li style="border: 0;">
-                    <a th:if="${session.loginUser==null}" href="http://auth.gulimall.com/login.html" class="aa">你好，请登录</a>
-                    <a th:else class="aa" style="width: 100px;">[[${session.loginUser.nickname}]]</a>
+                    <a th:if="${session.loginUser==null}" href="http://auth.gulimall.com/login.html"
+                       class="aa">你好，请登录</a>
+                    <a th:if="${session.loginUser!=null}" class="aa" style="width: 100px;">[[${session.loginUser.nickname}]]</a>
                 </li>
                 <li>
-                    <a th:if="${session.loginUser==null}" href="http://auth.gulimall.com/reg.html" style="color: red;">免费注册</a> |
+                    <a th:if="${session.loginUser==null}" href="http://auth.gulimall.com/reg.html" style="color: red;">免费注册</a>
+                    |
                 </li>
                 <li><a href="/static/item/javascript:;" class="aa">我的订单</a> |</li>
                 <li class="jingdong"><a href="/static/item/javascript:;">我的京东</a><span
@@ -626,7 +628,7 @@
 
                 <div class="box-btns clear">
                     <div class="box-btns-one">
-                        <input type="text" name="" id="" value="1"/>
+                        <input type="text" name="" id="numInput" value="1"/>
                         <div class="box-btns-one1">
 
                             <div>
@@ -643,7 +645,7 @@
                         </div>
                     </div>
                     <div class="box-btns-two">
-                        <a href="http://cart.gulimall.com/addToCart">
+                        <a href="#" id="addToCartA" th:attr="skuId=${item.info.skuId}">
                             加入购物车
                         </a>
                     </div>
@@ -1346,6 +1348,14 @@
         $(".sku_attr_value").parent().css({"border": "solid 1px #ccc"});
         $("a[class='sku_attr_value checked']").parent().css({"border": "solid 1px red"});
     };
+
+    $("#addToCartA").click(function () {
+        var num = $("#numInput").val();
+        var skuId = $(this).attr("skuId");
+        location.href = "http://cart.gulimall.com/addToCart?skuId=" + skuId + "&num=" + num;
+
+        return false;
+    });
 
 </script>
 
