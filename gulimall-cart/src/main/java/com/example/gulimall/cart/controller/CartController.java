@@ -3,6 +3,7 @@ package com.example.gulimall.cart.controller;
 import com.example.gulimall.cart.interceptor.CartInterceptor;
 import com.example.gulimall.cart.service.CartService;
 import com.example.gulimall.cart.to.UserInfoTo;
+import com.example.gulimall.cart.vo.Cart;
 import com.example.gulimall.cart.vo.CartItem;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -35,21 +36,23 @@ public class CartController {
      * @return
      */
     @GetMapping("/cart.html")
-    public String cartListPage() {
+    public String cartListPage(Model model) throws ExecutionException, InterruptedException {
+//        // 获取拦截器中的ThreadLocal中的数据
+//        UserInfoTo userInfoTo = CartInterceptor.threadLocal.get();
+//        System.out.println("userInfoTo = " + userInfoTo);
 
-        // 获取拦截器中的ThreadLocal中的数据
-        UserInfoTo userInfoTo = CartInterceptor.threadLocal.get();
-        System.out.println("userInfoTo = " + userInfoTo);
-
+        Cart cart = cartService.getCart();
+        model.addAttribute("cart", cart);
         return "cartList";
     }
 
     /**
      * 添加商品到购物车
-     *
+     * <p>
      * RedirectAttributes ra
-     *      ra.addFlashAttribute() 将数据放在session中，可以在页面取出，但是只能取一次
-     *      ra.addAttribute()  将数据放在url后面
+     * ra.addFlashAttribute() 将数据放在session中，可以在页面取出，但是只能取一次
+     * ra.addAttribute()  将数据放在url后面
+     *
      * @param skuId 商品skuId
      * @param num   添加几件到购物车
      * @return
