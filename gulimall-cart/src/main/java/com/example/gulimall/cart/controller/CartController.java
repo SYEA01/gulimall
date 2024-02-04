@@ -9,6 +9,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.util.concurrent.ExecutionException;
 
@@ -46,15 +47,33 @@ public class CartController {
     /**
      * 添加商品到购物车
      *
+     * RedirectAttributes ra
+     *      ra.addFlashAttribute() 将数据放在session中，可以在页面取出，但是只能取一次
+     *      ra.addAttribute()  将数据放在url后面
      * @param skuId 商品skuId
      * @param num   添加几件到购物车
      * @return
      */
     @GetMapping("/addToCart")
     public String addToCart(@RequestParam("skuId") Long skuId, @RequestParam("num") Integer num,
-                            Model model) throws ExecutionException, InterruptedException {
-        CartItem cartItem = cartService.addToCart(skuId, num);
-        model.addAttribute("item", cartItem);
+                            RedirectAttributes ra) throws ExecutionException, InterruptedException {
+        cartService.addToCart(skuId, num);
+        ra.addAttribute("skuId", skuId);
+        return "redirect:http://cart.gulimall.com/addToCartSuccess.html";
+    }
+
+    /**
+     * 跳转到成功页
+     *
+     * @param skuId
+     * @param model
+     * @return
+     */
+    @GetMapping("/addToCartSuccess.html")
+    public String addToCartSuccessPage(@RequestParam("skuId") Long skuId, Model model) {
+        // 重定向到成功页面。再次查询购物车数据即可
+        CartItem item = cartService.getCartItem(skuId);
+        model.addAttribute("item", item);
         return "success";
     }
 

@@ -77,12 +77,20 @@ public class CartServiceImpl implements CartService {
             return cartItem;
         } else {
             // 购物车有这个商品，修改数量即可
-            CartItem cartItem  = JSON.parseObject(res, CartItem.class);
+            CartItem cartItem = JSON.parseObject(res, CartItem.class);
             cartItem.setCount(cartItem.getCount() + num);
             String jsonString = JSON.toJSONString(cartItem);
             cartOps.put(skuId.toString(), jsonString);
             return cartItem;
         }
+    }
+
+    @Override
+    public CartItem getCartItem(Long skuId) {
+        BoundHashOperations<String, Object, Object> cartOps = getCartOps();
+        String o = (String) cartOps.get(skuId.toString());
+        CartItem cartItem = JSON.parseObject(o, CartItem.class);
+        return cartItem;
     }
 
     /**
