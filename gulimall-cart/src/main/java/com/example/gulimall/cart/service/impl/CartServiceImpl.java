@@ -193,4 +193,10 @@ public class CartServiceImpl implements CartService {
         cartItem.setCount(num);
         cartOps.put(skuId.toString(),JSON.toJSONString(cartItem));
     }
+
+    @Override
+    public void deleteItem(Long skuId) {
+        BoundHashOperations<String, Object, Object> cartOps = getCartOps();
+        cartOps.delete(skuId.toString());
+    }
 }
