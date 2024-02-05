@@ -23,6 +23,13 @@ public class CartController {
     @Autowired
     CartService cartService;
 
+    @GetMapping("/checkItem")
+    public String checkItem(@RequestParam Long skuId, @RequestParam Integer check) {
+        cartService.checkItem(skuId, check);
+        return "redirect:http://cart.gulimall.com/cart.html";
+
+    }
+
     /**
      * 去购物车页面
      * 浏览器有一个cookie：user-key：标识用户身份，一个月后过期
