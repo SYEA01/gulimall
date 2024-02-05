@@ -112,10 +112,10 @@
 
                             </li>
                             <li>
-                                <p>
-                                    <span>-</span>
-                                    <span th:text="${item.count}">5</span>
-                                    <span>+</span>
+                                <p th:attr="skuId=${item.skuId}">
+                                    <span class="countOpsBtn">-</span>
+                                    <span class="countOpsNum" th:text="${item.count}">5</span>
+                                    <span class="countOpsBtn">+</span>
                                 </p>
 
                             </li>
@@ -775,6 +775,14 @@
         var skuId = $(this).attr("skuId");
         var check = $(this).prop("checked");
         location.href = "http://cart.gulimall.com/checkItem?skuId=" + skuId + "&check=" + (check ? 1 : 0);
+    })
+
+    $(".countOpsBtn").click(function () {
+        // 1、获取skuId
+        var skuId = $(this).parent("p").attr("skuId");
+        var num = $(this).parent("p").find(".countOpsNum").text();
+        location.href = "http://cart.gulimall.com/countItem?skuId=" + skuId + "&num=" + num;
+
 
     })
 </script>

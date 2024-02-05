@@ -23,6 +23,24 @@ public class CartController {
     @Autowired
     CartService cartService;
 
+    /**
+     * 修改商品数量
+     * @param skuId
+     * @param num
+     * @return
+     */
+    @GetMapping("/countItem")
+    public String countItem(@RequestParam Long skuId,@RequestParam Integer num){
+        cartService.changeItemCount(skuId,num);
+        return "redirect:http://cart.gulimall.com/cart.html";
+    }
+
+    /**
+     * 选中购物项
+     * @param skuId
+     * @param check
+     * @return
+     */
     @GetMapping("/checkItem")
     public String checkItem(@RequestParam Long skuId, @RequestParam Integer check) {
         cartService.checkItem(skuId, check);
