@@ -7,6 +7,14 @@ spring:
     password: root
     url: jdbc:mysql://192.168.100.135:3306/gulimall_oms?useSSL=false
     driver-class-name: com.mysql.jdbc.Driver
+  # RabbitMQ 连接信息
+  rabbitmq:
+    host: 192.168.100.135
+    port: 5672
+    virtual-host: /
+    username: guest
+    password: guest
+
 
 
 mybatis-plus:
@@ -14,3 +22,4 @@ mybatis-plus:
   global-config:
     db-config:
       id-type: auto  # 主键自增
+
