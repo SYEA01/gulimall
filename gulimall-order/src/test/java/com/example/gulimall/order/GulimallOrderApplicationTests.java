@@ -1,5 +1,6 @@
 package com.example.gulimall.order;
 
+import com.example.gulimall.order.entity.OrderEntity;
 import com.example.gulimall.order.entity.OrderReturnReasonEntity;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.Test;
@@ -14,6 +15,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import java.util.Date;
+import java.util.UUID;
 
 @Slf4j
 @SpringBootTest
@@ -71,18 +73,28 @@ public class GulimallOrderApplicationTests {
      */
     @Test
     public void sendMessageTest() {
-        OrderReturnReasonEntity reasonEntity = new OrderReturnReasonEntity();
-        reasonEntity.setId(1L);
-        reasonEntity.setCreateTime(new Date());
-        reasonEntity.setName("哈哈");
 
         // 1、如果发送的消息是个对象，这个对象必须序列化，才能将对象写出去
-
         // 2、发送的对象类型的消息，可以是JSON类型（不使用默认的Java序列化）
 
-        // 给哪个交换机发送消息   路由键是什么   消息内容
-        rabbitTemplate.convertAndSend("hello.java.exchange", "hello.java", reasonEntity);
-        log.info("message send success [{}]", reasonEntity);
+
+        for (int i = 0; i < 10; i++) {
+            if (i % 2 == 0) {
+                OrderReturnReasonEntity reasonEntity = new OrderReturnReasonEntity();
+                reasonEntity.setId(1L);
+                reasonEntity.setCreateTime(new Date());
+                reasonEntity.setName("哈哈 - " + i);
+                // 给哪个交换机发送消息   路由键是什么   消息内容
+                rabbitTemplate.convertAndSend("hello.java.exchange", "hello.java", reasonEntity);
+            } else {
+                OrderEntity entity = new OrderEntity();
+                entity.setOrderSn(UUID.randomUUID().toString());
+                // 给哪个交换机发送消息   路由键是什么   消息内容
+                rabbitTemplate.convertAndSend("hello.java.exchange", "hello.java", entity);
+            }
+            log.info("message send success");
+        }
+
     }
 
 }
