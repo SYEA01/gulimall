@@ -21,6 +21,10 @@ spring:
     # 如果消息抵达了队列，就会以异步的方式优先执行publisher-returns这个回调
     template:
       mandatory: true
+      # 手动ack消息
+    listener:
+      simple:
+        acknowledge-mode: manual
 
 
 

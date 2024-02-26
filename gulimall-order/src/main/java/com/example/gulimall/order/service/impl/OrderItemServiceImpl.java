@@ -9,6 +9,7 @@ import org.springframework.amqp.rabbit.annotation.RabbitHandler;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.stereotype.Service;
 
+import java.io.IOException;
 import java.util.Map;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
@@ -47,7 +48,17 @@ public class OrderItemServiceImpl extends ServiceImpl<OrderItemDao, OrderItemEnt
      * --、 队列可以有很多人来监听。只要有一个人收到此消息，队列就会删除这条消息 【 只能有一个人接收 】
      * --、 只有当前接收消息的方法处理完成之后，才能再接收下一条消息
      */
+
+    /**
+     * 在接收消息时使用channl接收消息，手动确认收到消息
+     * 只要不手动确认收到消息，消息就一直在queue中存在，即使Java服务器宕机，消息也不会丢失
+     *
+     * @param message
+     * @param content
+     * @param channel
+     */
 //    @RabbitListener(queues = {"hello.java.queue"})
+    @RabbitHandler
     public void receiveMessage(Message message,
                                OrderReturnReasonEntity content,
                                Channel channel) {
@@ -60,11 +71,22 @@ public class OrderItemServiceImpl extends ServiceImpl<OrderItemDao, OrderItemEnt
 //        System.out.println("参数的第一种写法：原生消息：" + message);
 //        System.out.println("参数的第二种写法：直接写消息的类型：" + content);
 //        System.out.println("参数的第三种写法：接收消息的通道：" + channel);
+
+        // 消息的标识，是在channel内自增的
+        long deliveryTag = message.getMessageProperties().getDeliveryTag();
+        try {
+            // 两个参数：第一个：消息的标识    第二个：是否批量确认（channel有很多消息，true代表批量确认；false代表单个确认）
+            channel.basicAck(deliveryTag, false);  // 确认收到消息
+            System.out.println("收到了消息：" + deliveryTag);
+        } catch (IOException e) {
+            // 网络中断了
+        }
     }
 
     /**
      * 如果这个队列接收多种类型的消息，可以将@RabbitListener注解标注在类上，代表监听哪个队列
      * 然后在不同的方法上使用@RabbitHandler注解，分别接收不同类型的消息
+     *
      * @param entity
      */
     @RabbitHandler
@@ -76,8 +98,6 @@ public class OrderItemServiceImpl extends ServiceImpl<OrderItemDao, OrderItemEnt
     public void receiveMessage2(OrderEntity entity) {
         System.out.println("接收到的第二种消息：" + entity);
     }
-
-
 
 
 }
