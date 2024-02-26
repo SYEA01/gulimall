@@ -14,6 +14,13 @@ spring:
     virtual-host: /
     username: guest
     password: guest
+    # 开启发送端确认  消息抵达broker确认
+    publisher-confirms: true
+    # 开启发送端确认  消息抵达queue确认
+    publisher-returns: true
+    # 如果消息抵达了队列，就会以异步的方式优先执行publisher-returns这个回调
+    template:
+      mandatory: true
 
 
 
