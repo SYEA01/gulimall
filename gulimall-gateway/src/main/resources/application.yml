@@ -89,4 +89,9 @@ spring:
             # 只要 请求体的Host中的值是 cart.gulimall.com 就匹配到gulimall-cart服务
             - Host=cart.gulimall.com
 
+        - id: gulimall_order_route
+          uri: lb://gulimall-order
+          predicates:
+            # 只要 请求体的Host中的值是 order.gulimall.com 就匹配到gulimall-order服务
+            - Host=order.gulimall.com
 
