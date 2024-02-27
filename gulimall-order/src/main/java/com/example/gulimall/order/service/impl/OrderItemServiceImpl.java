@@ -22,6 +22,9 @@ import com.example.gulimall.order.dao.OrderItemDao;
 import com.example.gulimall.order.entity.OrderItemEntity;
 import com.example.gulimall.order.service.OrderItemService;
 
+/**
+ * @author taoao
+ */
 @RabbitListener(queues = {"hello.java.queue"})
 @Service("orderItemService")
 public class OrderItemServiceImpl extends ServiceImpl<OrderItemDao, OrderItemEntity> implements OrderItemService {
@@ -75,9 +78,20 @@ public class OrderItemServiceImpl extends ServiceImpl<OrderItemDao, OrderItemEnt
         // 消息的标识，是在channel内自增的
         long deliveryTag = message.getMessageProperties().getDeliveryTag();
         try {
-            // 两个参数：第一个：消息的标识    第二个：是否批量确认（channel有很多消息，true代表批量确认；false代表单个确认）
-            channel.basicAck(deliveryTag, false);  // 确认收到消息
-            System.out.println("收到了消息：" + deliveryTag);
+            if (deliveryTag % 2 == 0) {
+                // 确认接收消息
+                // 两个参数：第一个：消息的标识    第二个：是否批量确认（channel有很多消息，true代表批量确认；false代表单个确认）
+                channel.basicAck(deliveryTag, false);  // 确认收到消息
+                System.out.println("收到了消息：" + deliveryTag);
+            } else {
+                // 确认不接收消息 (方式1)
+                // 三个参数：消息的标识  是否批量拒绝  是否重新放入队列
+                channel.basicNack(deliveryTag, false, true);
+                // 确认不接收消息 (方式2)
+                // 两个参数：消息的标识   是否重新放入队列
+                // channel.basicReject();
+                System.out.println("没有收到货物：" + deliveryTag);
+            }
         } catch (IOException e) {
             // 网络中断了
         }
@@ -89,12 +103,12 @@ public class OrderItemServiceImpl extends ServiceImpl<OrderItemDao, OrderItemEnt
      *
      * @param entity
      */
-    @RabbitHandler
+//    @RabbitHandler
     public void receiveMessage1(OrderReturnReasonEntity entity) {
         System.out.println("接收到的第一种消息：" + entity);
     }
 
-    @RabbitHandler
+//    @RabbitHandler
     public void receiveMessage2(OrderEntity entity) {
         System.out.println("接收到的第二种消息：" + entity);
     }

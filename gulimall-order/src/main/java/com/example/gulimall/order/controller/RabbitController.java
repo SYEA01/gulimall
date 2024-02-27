@@ -36,7 +36,7 @@ public class RabbitController {
                 OrderEntity entity = new OrderEntity();
                 entity.setOrderSn(UUID.randomUUID().toString());
                 // 给哪个交换机发送消息   路由键是什么   消息内容
-                rabbitTemplate.convertAndSend("hello.java.exchange", "hello22.java", entity);
+                rabbitTemplate.convertAndSend("hello.java.exchange", "hello.java", entity);
             }
             log.info("message send success");
         }
