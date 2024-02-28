@@ -5,6 +5,7 @@ import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 /**
@@ -14,6 +15,7 @@ import java.util.List;
 public interface ProductFeignService {
     /**
      * 根据id查询sku信息
+     *
      * @param skuId
      * @return
      */
@@ -22,9 +24,19 @@ public interface ProductFeignService {
 
     /**
      * 根据skuId获取属性列表
+     *
      * @param skuId
      * @return
      */
     @GetMapping("/product/skusaleattrvalue/stringlist/{skuId}")
     List<String> getSkuSaleAttrValues(@PathVariable("skuId") Long skuId);
+
+    /**
+     * 获取商品的价格
+     *
+     * @param skuId
+     * @return
+     */
+    @GetMapping("/product/skuinfo/{skuId}/price")
+    BigDecimal getPrice(@PathVariable Long skuId);
 }
