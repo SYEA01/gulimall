@@ -12,6 +12,10 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ThreadPoolExecutor;
+
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
@@ -32,6 +36,9 @@ public class OrderServiceImpl extends ServiceImpl<OrderDao, OrderEntity> impleme
     @Autowired
     CartFeignService cartFeignService;
 
+    @Autowired
+    ThreadPoolExecutor executor;
+
 
     @Override
     public PageUtils queryPage(Map<String, Object> params) {
@@ -44,16 +51,23 @@ public class OrderServiceImpl extends ServiceImpl<OrderDao, OrderEntity> impleme
     }
 
     @Override
-    public OrderConfirmVo confirmOrder() {
+    public OrderConfirmVo confirmOrder() throws ExecutionException, InterruptedException {
         OrderConfirmVo confirmVo = new OrderConfirmVo();
         MemberRespVo memberRespVo = LoginUserInterceptor.loginUser.get();
-        // 1、远程查询所有的收货地址列表
-        List<MemberAddressVo> address = memberFeignService.getAddress(memberRespVo.getId());
-        confirmVo.setAddress(address);
 
-        // 2、远程查询购物车所有选中的购物项
-        List<OrderItemVo> items = cartFeignService.getCurrentUserCartItems();
-        confirmVo.setItems(items);
+        CompletableFuture<Void> getAddressFuture = CompletableFuture.runAsync(() -> {
+            // 1、远程查询所有的收货地址列表
+            List<MemberAddressVo> address = memberFeignService.getAddress(memberRespVo.getId());
+            confirmVo.setAddress(address);
+        }, executor);
+
+        CompletableFuture<Void> getCartFuture = CompletableFuture.runAsync(() -> {
+            // 2、远程查询购物车所有选中的购物项
+            List<OrderItemVo> items = cartFeignService.getCurrentUserCartItems();
+            confirmVo.setItems(items);
+        }, executor);
+
+
         // feign在远程调用之前要构造请求，调用很多的拦截器RequestInterceptor
 
         // 3、查询用户积分
@@ -63,6 +77,8 @@ public class OrderServiceImpl extends ServiceImpl<OrderDao, OrderEntity> impleme
         // 4、其他数据自动计算
 
         // TODO 5、防重令牌
+
+        CompletableFuture.allOf(getAddressFuture, getCartFuture).get();
 
 
         return confirmVo;
