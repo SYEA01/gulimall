@@ -25,6 +25,8 @@ import com.example.common.utils.Query;
 import com.example.gulimall.order.dao.OrderDao;
 import com.example.gulimall.order.entity.OrderEntity;
 import com.example.gulimall.order.service.OrderService;
+import org.springframework.web.context.request.RequestAttributes;
+import org.springframework.web.context.request.RequestContextHolder;
 
 
 @Service("orderService")
@@ -54,15 +56,23 @@ public class OrderServiceImpl extends ServiceImpl<OrderDao, OrderEntity> impleme
     public OrderConfirmVo confirmOrder() throws ExecutionException, InterruptedException {
         OrderConfirmVo confirmVo = new OrderConfirmVo();
         MemberRespVo memberRespVo = LoginUserInterceptor.loginUser.get();
+        System.out.println("主线程---》"+Thread.currentThread().getId());
+
+        // 获取主线程的请求数据，然后在异步时每一个线程中都设置上这个请求数据，就可以保证不同的线程都可以获取到当前线程的请求数据了
+        RequestAttributes requestAttributes = RequestContextHolder.getRequestAttributes();
 
         CompletableFuture<Void> getAddressFuture = CompletableFuture.runAsync(() -> {
             // 1、远程查询所有的收货地址列表
+            System.out.println("member线程---》"+Thread.currentThread().getId());
+            RequestContextHolder.setRequestAttributes(requestAttributes);
             List<MemberAddressVo> address = memberFeignService.getAddress(memberRespVo.getId());
             confirmVo.setAddress(address);
         }, executor);
 
         CompletableFuture<Void> getCartFuture = CompletableFuture.runAsync(() -> {
             // 2、远程查询购物车所有选中的购物项
+            System.out.println("cart线程---》"+Thread.currentThread().getId());
+            RequestContextHolder.setRequestAttributes(requestAttributes);
             List<OrderItemVo> items = cartFeignService.getCurrentUserCartItems();
             confirmVo.setItems(items);
         }, executor);
