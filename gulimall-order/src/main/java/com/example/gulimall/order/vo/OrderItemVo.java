@@ -33,9 +33,7 @@ public class OrderItemVo {
     //
     private BigDecimal totalPrice;
 
-    // 是否有货   TODO
-    private boolean hasStock;
 
-    // TODO 商品重量
+    // 商品重量
     private BigDecimal weight;
 }
