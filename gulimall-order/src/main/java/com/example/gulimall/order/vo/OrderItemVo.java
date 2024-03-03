@@ -30,4 +30,12 @@ public class OrderItemVo {
     // 商品数量
     private Integer count;
 
+    //
+    private BigDecimal totalPrice;
+
+    // 是否有货   TODO
+    private boolean hasStock;
+
+    // TODO 商品重量
+    private BigDecimal weight;
 }

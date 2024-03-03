@@ -53,4 +53,14 @@ public class OrderConfirmVo {
     @Getter
     @Setter
     private String orderToken;
+
+    public Integer getCount() {
+        Integer i = 0;
+        if (items != null) {
+            for (OrderItemVo item : items) {
+                i += item.getCount();
+            }
+        }
+        return i;
+    }
 }
