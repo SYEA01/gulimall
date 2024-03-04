@@ -8,14 +8,13 @@ import com.example.gulimall.order.feign.CartFeignService;
 import com.example.gulimall.order.feign.MemberFeignService;
 import com.example.gulimall.order.feign.WareFeignService;
 import com.example.gulimall.order.interceptor.LoginUserInterceptor;
-import com.example.gulimall.order.vo.MemberAddressVo;
-import com.example.gulimall.order.vo.OrderConfirmVo;
-import com.example.gulimall.order.vo.OrderItemVo;
-import com.example.gulimall.order.vo.SkuStockVo;
+import com.example.gulimall.order.vo.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.StringRedisTemplate;
+import org.springframework.data.redis.core.script.DefaultRedisScript;
 import org.springframework.stereotype.Service;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -123,6 +122,33 @@ public class OrderServiceImpl extends ServiceImpl<OrderDao, OrderEntity> impleme
 
 
         return confirmVo;
+    }
+
+    @Override
+    public SubmitOrderResponseVo submitOrder(OrderSubmitVo vo) {
+        SubmitOrderResponseVo responseVo = new SubmitOrderResponseVo();
+        MemberRespVo memberRespVo = LoginUserInterceptor.loginUser.get();
+        // 1、验证令牌 【令牌的对比和删除必须保证原子性】
+        String script = "if redis.call('get', KEYS[1]) == ARGV[1] then return redis.call('del', KEYS[1]) else return 0 end";
+        String orderToken = vo.getOrderToken();
+        String tokenKey = OrderConstant.USER_ORDER_TOKEN_PREFIX + memberRespVo.getId();
+        String serverToken = redisTemplate.opsForValue().get(tokenKey);
+//        if (orderToken != null && orderToken.equals(serverToken)) {
+//            // 令牌验证通过
+//        } else {
+//            // 不通过
+//        }
+        // 原子验证令牌和删除令牌     0代表令牌校验失败；1删除成功
+        Long execute = redisTemplate.execute(new DefaultRedisScript<Long>(script, Long.class), Arrays.asList(tokenKey), orderToken);
+        if (execute==0L){
+            // 令牌验证失败
+            return responseVo;
+        }else {
+            // 令牌验证通过
+            // 下单去创建订单，验令牌，验价格，锁库存。。。
+
+        }
+        return responseVo;
     }
 
 }
