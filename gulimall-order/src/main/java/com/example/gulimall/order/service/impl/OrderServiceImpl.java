@@ -3,6 +3,7 @@ package com.example.gulimall.order.service.impl;
 import com.alibaba.fastjson.TypeReference;
 import com.example.common.utils.R;
 import com.example.common.vo.MemberRespVo;
+import com.example.gulimall.order.constant.OrderConstant;
 import com.example.gulimall.order.feign.CartFeignService;
 import com.example.gulimall.order.feign.MemberFeignService;
 import com.example.gulimall.order.feign.WareFeignService;
@@ -12,13 +13,16 @@ import com.example.gulimall.order.vo.OrderConfirmVo;
 import com.example.gulimall.order.vo.OrderItemVo;
 import com.example.gulimall.order.vo.SkuStockVo;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
@@ -48,6 +52,9 @@ public class OrderServiceImpl extends ServiceImpl<OrderDao, OrderEntity> impleme
 
     @Autowired
     ThreadPoolExecutor executor;
+
+    @Autowired
+    StringRedisTemplate redisTemplate;
 
 
     @Override
@@ -105,6 +112,12 @@ public class OrderServiceImpl extends ServiceImpl<OrderDao, OrderEntity> impleme
         // 4、其他数据自动计算
 
         // TODO 5、防重令牌
+        String token = UUID.randomUUID().toString().replace("-", "");
+        // 给服务器放一个防重令牌  过期时间：30分钟
+        redisTemplate.opsForValue().set(OrderConstant.USER_ORDER_TOKEN_PREFIX + memberRespVo.getId(), token, 30, TimeUnit.MINUTES);
+
+        // 给页面放一个防重令牌
+        confirmVo.setOrderToken(token);
 
         CompletableFuture.allOf(getAddressFuture, getCartFuture).get();
 
