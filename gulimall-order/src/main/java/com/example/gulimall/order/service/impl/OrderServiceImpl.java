@@ -6,6 +6,7 @@ import com.example.common.utils.R;
 import com.example.common.vo.MemberRespVo;
 import com.example.gulimall.order.constant.OrderConstant;
 import com.example.gulimall.order.entity.OrderItemEntity;
+import com.example.gulimall.order.enume.OrderStatusEnum;
 import com.example.gulimall.order.feign.CartFeignService;
 import com.example.gulimall.order.feign.MemberFeignService;
 import com.example.gulimall.order.feign.ProductFeignService;
@@ -160,7 +161,18 @@ public class OrderServiceImpl extends ServiceImpl<OrderDao, OrderEntity> impleme
         } else {
             // 令牌验证通过
             // 下单去创建订单，验令牌，验价格，锁库存。。。
+            // 1、创建订单、订单项等信息
             OrderCreateTo orderCreateTo = createOrder();
+            // 2、验价
+            BigDecimal payAmount = orderCreateTo.getOrder().getPayAmount();  // 订单算出的价格
+            BigDecimal viewPrice = vo.getPayPrice();  // 页面提交过来的价格
+            if (Math.abs(payAmount.subtract(viewPrice).doubleValue()) < 0.01) {
+                // 金额对比成功
+
+            }else {
+                responseVo.setCode(2);
+                return responseVo;
+            }
 
 
         }
@@ -179,10 +191,60 @@ public class OrderServiceImpl extends ServiceImpl<OrderDao, OrderEntity> impleme
         // 2、获取所有的订单项
         List<OrderItemEntity> itemEntities = buildOrderItems(orderSn);
 
-        // 3、验价
+        // 3、计算价格相关
+        computePrice(order, itemEntities);
 
 
         return orderCreateTo;
+
+    }
+
+    /**
+     * 计算价格相关
+     *
+     * @param order
+     * @param itemEntities
+     */
+    private void computePrice(OrderEntity order, List<OrderItemEntity> itemEntities) {
+        // 1、订单价格相关  订单的总额 = 叠加每一个订单项的总额
+        // 订单的总额
+        BigDecimal totalPrice = new BigDecimal("0.0");
+        // 优惠卷的总额
+        BigDecimal coupon = new BigDecimal("0.0");
+        // 积分的总额
+        BigDecimal integration = new BigDecimal("0.0");
+        // 促销的总额
+        BigDecimal promotion = new BigDecimal("0.0");
+        // 积分信息
+        BigDecimal gift = new BigDecimal("0.0");
+        // 成长值
+        BigDecimal growth = new BigDecimal("0.0");
+        for (OrderItemEntity entity : itemEntities) {
+            totalPrice = totalPrice.add(entity.getRealAmount());
+            coupon = coupon.add(entity.getCouponAmount());
+            integration = integration.add(entity.getIntegrationAmount());
+            promotion = promotion.add(entity.getPromotionAmount());
+            gift = gift.add(BigDecimal.valueOf(entity.getGiftIntegration()));
+            growth = growth.add(BigDecimal.valueOf(entity.getGiftGrowth()));
+        }
+        order.setTotalAmount(totalPrice);
+        // 应付的总额 = 订单总额 + 运费
+        order.setPayAmount(totalPrice.add(order.getFreightAmount()));
+
+        order.setPromotionAmount(promotion);
+        order.setIntegrationAmount(integration);
+        order.setCouponAmount(coupon);
+
+        // 2、订单的相关状态信息
+        order.setStatus(OrderStatusEnum.CREATE_NEW.getCode());
+        order.setDeleteStatus(0);  // 未删除
+        // 3、自动确认时间
+        order.setAutoConfirmDay(7);
+
+        // 4、积分、成长值信息
+        order.setIntegration(gift.intValue());
+        order.setGrowth(growth.intValue());
+
 
     }
 
@@ -256,8 +318,19 @@ public class OrderServiceImpl extends ServiceImpl<OrderDao, OrderEntity> impleme
         itemEntity.setSkuQuantity(cartItem.getCount());
         // 4、优惠信息（没做）
         // 5、积分信息
-        itemEntity.setGiftGrowth(cartItem.getPrice().intValue());
-        itemEntity.setGiftIntegration(cartItem.getPrice().intValue());
+        itemEntity.setGiftGrowth(cartItem.getPrice().multiply(BigDecimal.valueOf(cartItem.getCount())).intValue());
+        itemEntity.setGiftIntegration(cartItem.getPrice().multiply(BigDecimal.valueOf(cartItem.getCount())).intValue());
+
+        // 6、订单项的价格信息
+        itemEntity.setPromotionAmount(new BigDecimal("0.0"));
+        itemEntity.setCouponAmount(new BigDecimal("0.0"));
+        itemEntity.setIntegrationAmount(new BigDecimal("0.0"));
+        BigDecimal originalPrice = itemEntity.getSkuPrice().multiply(BigDecimal.valueOf(itemEntity.getSkuQuantity()));
+        // 实际价格 总额 - 各种优惠
+        BigDecimal actualPrice = originalPrice.subtract(itemEntity.getCouponAmount())
+                .subtract(itemEntity.getPromotionAmount())
+                .subtract(itemEntity.getIntegrationAmount());
+        itemEntity.setRealAmount(actualPrice);
 
         return itemEntity;
     }
