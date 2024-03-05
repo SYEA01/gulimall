@@ -1,19 +1,23 @@
 package com.example.gulimall.order.service.impl;
 
 import com.alibaba.fastjson.TypeReference;
+import com.baomidou.mybatisplus.core.toolkit.IdWorker;
 import com.example.common.utils.R;
 import com.example.common.vo.MemberRespVo;
 import com.example.gulimall.order.constant.OrderConstant;
+import com.example.gulimall.order.entity.OrderItemEntity;
 import com.example.gulimall.order.feign.CartFeignService;
 import com.example.gulimall.order.feign.MemberFeignService;
 import com.example.gulimall.order.feign.WareFeignService;
 import com.example.gulimall.order.interceptor.LoginUserInterceptor;
+import com.example.gulimall.order.to.OrderCreateTo;
 import com.example.gulimall.order.vo.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.data.redis.core.script.DefaultRedisScript;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
@@ -39,6 +43,9 @@ import org.springframework.web.context.request.RequestContextHolder;
 
 @Service("orderService")
 public class OrderServiceImpl extends ServiceImpl<OrderDao, OrderEntity> implements OrderService {
+
+    private ThreadLocal<OrderSubmitVo> submitVoThreadLocal = new ThreadLocal<>();
+
 
     @Autowired
     MemberFeignService memberFeignService;
@@ -126,6 +133,7 @@ public class OrderServiceImpl extends ServiceImpl<OrderDao, OrderEntity> impleme
 
     @Override
     public SubmitOrderResponseVo submitOrder(OrderSubmitVo vo) {
+        submitVoThreadLocal.set(vo);
         SubmitOrderResponseVo responseVo = new SubmitOrderResponseVo();
         MemberRespVo memberRespVo = LoginUserInterceptor.loginUser.get();
         // 1、验证令牌 【令牌的对比和删除必须保证原子性】
@@ -140,15 +148,87 @@ public class OrderServiceImpl extends ServiceImpl<OrderDao, OrderEntity> impleme
 //        }
         // 原子验证令牌和删除令牌     0代表令牌校验失败；1删除成功
         Long execute = redisTemplate.execute(new DefaultRedisScript<Long>(script, Long.class), Arrays.asList(tokenKey), orderToken);
-        if (execute==0L){
+        if (execute == 0L) {
             // 令牌验证失败
+            responseVo.setCode(1);
             return responseVo;
-        }else {
+        } else {
             // 令牌验证通过
             // 下单去创建订单，验令牌，验价格，锁库存。。。
+            OrderCreateTo orderCreateTo = createOrder();
+
 
         }
         return responseVo;
+    }
+
+    /**
+     * 创建订单
+     */
+    private OrderCreateTo createOrder() {
+        OrderCreateTo orderCreateTo = new OrderCreateTo();
+        // 1、生成订单号
+        String orderSn = IdWorker.getTimeId();
+        OrderEntity order = buildOrder(orderSn);
+
+        // 2、获取所有的订单项
+        List<OrderItemEntity> itemEntities = buildOrderItems();
+
+        // 3、验价
+
+
+        return orderCreateTo;
+
+    }
+
+    private OrderEntity buildOrder(String orderSn) {
+        OrderEntity entity = new OrderEntity();
+
+        entity.setOrderSn(orderSn);
+        // 2、获取收货地址信息
+        OrderSubmitVo orderSubmitVo = submitVoThreadLocal.get();
+        R r = wareFeignService.getFare(orderSubmitVo.getAddrId());
+        FareVo fareResp = r.getData(new TypeReference<FareVo>() {
+        });
+        // 设置运费信息
+        entity.setFreightAmount(fareResp.getFare());
+        // 设置收货人信息
+        entity.setReceiverCity(fareResp.getAddress().getCity());
+        entity.setReceiverDetailAddress(fareResp.getAddress().getDetailAddress());
+        entity.setReceiverName(fareResp.getAddress().getName());
+        entity.setReceiverPhone(fareResp.getAddress().getPhone());
+        entity.setReceiverPostCode(fareResp.getAddress().getPostCode());
+        entity.setReceiverProvince(fareResp.getAddress().getProvince());
+        entity.setReceiverRegion(fareResp.getAddress().getRegion());
+
+        return entity;
+    }
+
+    /**
+     * 构建所有订单项数据
+     *
+     * @return
+     */
+    private List<OrderItemEntity> buildOrderItems() {
+        List<OrderItemVo> currentUserCartItems = cartFeignService.getCurrentUserCartItems();
+        if (currentUserCartItems != null && currentUserCartItems.size() > 0) {
+            List<OrderItemEntity> itemEntities = currentUserCartItems.stream().map(cartItem -> {
+                // 构建订单项
+                OrderItemEntity itemEntity = buildOrderItem(cartItem);
+
+                return itemEntity;
+            }).collect(Collectors.toList());
+        }
+        return null;
+    }
+
+    /**
+     * 构建某一个订单项
+     * @param cartItem
+     * @return
+     */
+    private OrderItemEntity buildOrderItem(OrderItemVo cartItem) {
+        return null;
     }
 
 }
