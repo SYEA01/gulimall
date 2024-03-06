@@ -1,22 +1,19 @@
 package com.example.gulimall.ware.controller;
 
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
-
-//import org.apache.shiro.authz.annotation.RequiresPermissions;
 import com.example.common.exception.BizCodeEnume;
-import com.example.gulimall.ware.exception.NoStockException;
-import com.example.gulimall.ware.vo.LockStockResult;
+import com.example.common.exception.NoStockException;
+import com.example.common.utils.PageUtils;
+import com.example.common.utils.R;
+import com.example.gulimall.ware.entity.WareSkuEntity;
+import com.example.gulimall.ware.service.WareSkuService;
 import com.example.gulimall.ware.vo.SkuHasStockVo;
 import com.example.gulimall.ware.vo.WareSkuLockVo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
-import com.example.gulimall.ware.entity.WareSkuEntity;
-import com.example.gulimall.ware.service.WareSkuService;
-import com.example.common.utils.PageUtils;
-import com.example.common.utils.R;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
 
 
 /**

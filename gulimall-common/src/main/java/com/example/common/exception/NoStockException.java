@@ -1,4 +1,4 @@
-package com.example.gulimall.ware.exception;
+package com.example.common.exception;
 
 import lombok.Getter;
 import lombok.Setter;
@@ -14,5 +14,9 @@ public class NoStockException extends RuntimeException {
 
     public NoStockException(Long skuId) {
         super("商品id" + skuId + "没有足够的库存了");
+    }
+
+    public NoStockException(String msg) {
+        super("商品id" + msg + "没有足够的库存了");
     }
 }

@@ -2,6 +2,7 @@ package com.example.gulimall.order.service.impl;
 
 import com.alibaba.fastjson.TypeReference;
 import com.baomidou.mybatisplus.core.toolkit.IdWorker;
+import com.example.common.exception.NoStockException;
 import com.example.common.utils.R;
 import com.example.common.vo.MemberRespVo;
 import com.example.gulimall.order.constant.OrderConstant;
@@ -145,11 +146,12 @@ public class OrderServiceImpl extends ServiceImpl<OrderDao, OrderEntity> impleme
         submitVoThreadLocal.set(vo);
         SubmitOrderResponseVo responseVo = new SubmitOrderResponseVo();
         MemberRespVo memberRespVo = LoginUserInterceptor.loginUser.get();
+        responseVo.setCode(0);
         // 1、验证令牌 【令牌的对比和删除必须保证原子性】
         String script = "if redis.call('get', KEYS[1]) == ARGV[1] then return redis.call('del', KEYS[1]) else return 0 end";
         String orderToken = vo.getOrderToken();
         String tokenKey = OrderConstant.USER_ORDER_TOKEN_PREFIX + memberRespVo.getId();
-        String serverToken = redisTemplate.opsForValue().get(tokenKey);
+//        String serverToken = redisTemplate.opsForValue().get(tokenKey);
 //        if (orderToken != null && orderToken.equals(serverToken)) {
 //            // 令牌验证通过
 //        } else {
@@ -185,11 +187,18 @@ public class OrderServiceImpl extends ServiceImpl<OrderDao, OrderEntity> impleme
                     return orderItemVo;
                 }).collect(Collectors.toList());
                 lockVo.setLocks(locks);
+                // TODO 远程锁库存
                 R r = wareFeignService.orderLockStock(lockVo);
-                if (r.getCode() == 0){
+                if (r.getCode() == 0) {
                     //锁定成功了
-                }else {
+                    responseVo.setOrder(orderCreateTo.getOrder());
+                    return responseVo;
+                } else {
                     // 锁定失败了
+                    String msg = (String) r.get("msg");
+                    throw new NoStockException(msg);
+//                    responseVo.setCode(3);
+//                    return responseVo;
                 }
             } else {
                 responseVo.setCode(2);
@@ -198,7 +207,6 @@ public class OrderServiceImpl extends ServiceImpl<OrderDao, OrderEntity> impleme
 
 
         }
-        return responseVo;
     }
 
     /**

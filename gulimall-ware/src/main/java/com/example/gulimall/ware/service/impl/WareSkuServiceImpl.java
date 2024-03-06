@@ -1,31 +1,28 @@
 package com.example.gulimall.ware.service.impl;
 
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.example.common.exception.NoStockException;
+import com.example.common.utils.PageUtils;
+import com.example.common.utils.Query;
 import com.example.common.utils.R;
-import com.example.gulimall.ware.exception.NoStockException;
+import com.example.gulimall.ware.dao.WareSkuDao;
+import com.example.gulimall.ware.entity.WareSkuEntity;
 import com.example.gulimall.ware.feign.ProductFeignService;
-import com.example.gulimall.ware.vo.LockStockResult;
+import com.example.gulimall.ware.service.WareSkuService;
 import com.example.gulimall.ware.vo.OrderItemVo;
 import com.example.gulimall.ware.vo.SkuHasStockVo;
 import com.example.gulimall.ware.vo.WareSkuLockVo;
 import lombok.Data;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.StringUtils;
 
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
-
-import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
-import com.baomidou.mybatisplus.core.metadata.IPage;
-import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import com.example.common.utils.PageUtils;
-import com.example.common.utils.Query;
-
-import com.example.gulimall.ware.dao.WareSkuDao;
-import com.example.gulimall.ware.entity.WareSkuEntity;
-import com.example.gulimall.ware.service.WareSkuService;
-import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.StringUtils;
 
 
 @Service("wareSkuService")
