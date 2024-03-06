@@ -5,6 +5,7 @@ import com.baomidou.mybatisplus.core.toolkit.IdWorker;
 import com.example.common.utils.R;
 import com.example.common.vo.MemberRespVo;
 import com.example.gulimall.order.constant.OrderConstant;
+import com.example.gulimall.order.dao.OrderItemDao;
 import com.example.gulimall.order.entity.OrderItemEntity;
 import com.example.gulimall.order.enume.OrderStatusEnum;
 import com.example.gulimall.order.feign.CartFeignService;
@@ -12,6 +13,7 @@ import com.example.gulimall.order.feign.MemberFeignService;
 import com.example.gulimall.order.feign.ProductFeignService;
 import com.example.gulimall.order.feign.WareFeignService;
 import com.example.gulimall.order.interceptor.LoginUserInterceptor;
+import com.example.gulimall.order.service.OrderItemService;
 import com.example.gulimall.order.to.OrderCreateTo;
 import com.example.gulimall.order.vo.*;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,10 +22,7 @@ import org.springframework.data.redis.core.script.DefaultRedisScript;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ThreadPoolExecutor;
@@ -39,6 +38,7 @@ import com.example.common.utils.Query;
 import com.example.gulimall.order.dao.OrderDao;
 import com.example.gulimall.order.entity.OrderEntity;
 import com.example.gulimall.order.service.OrderService;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 import org.springframework.web.context.request.RequestAttributes;
 import org.springframework.web.context.request.RequestContextHolder;
@@ -49,6 +49,8 @@ public class OrderServiceImpl extends ServiceImpl<OrderDao, OrderEntity> impleme
 
     private ThreadLocal<OrderSubmitVo> submitVoThreadLocal = new ThreadLocal<>();
 
+    @Autowired
+    OrderItemService orderItemService;
 
     @Autowired
     MemberFeignService memberFeignService;
@@ -137,6 +139,7 @@ public class OrderServiceImpl extends ServiceImpl<OrderDao, OrderEntity> impleme
         return confirmVo;
     }
 
+    @Transactional
     @Override
     public SubmitOrderResponseVo submitOrder(OrderSubmitVo vo) {
         submitVoThreadLocal.set(vo);
@@ -168,8 +171,27 @@ public class OrderServiceImpl extends ServiceImpl<OrderDao, OrderEntity> impleme
             BigDecimal viewPrice = vo.getPayPrice();  // 页面提交过来的价格
             if (Math.abs(payAmount.subtract(viewPrice).doubleValue()) < 0.01) {
                 // 金额对比成功
-
-            }else {
+                // 3、保存订单
+                saveOrder(orderCreateTo);
+                // 4、锁定库存,只要有异常，就回滚订单数据。
+                // 订单号、所有订单项（skuId，skuName，锁定的商品数量）
+                WareSkuLockVo lockVo = new WareSkuLockVo();
+                lockVo.setOrderSn(orderCreateTo.getOrder().getOrderSn());
+                List<OrderItemVo> locks = orderCreateTo.getOrderItems().stream().map(item -> {
+                    OrderItemVo orderItemVo = new OrderItemVo();
+                    orderItemVo.setSkuId(item.getSkuId());
+                    orderItemVo.setCount(item.getSkuQuantity());
+                    orderItemVo.setTitle(item.getSkuName());
+                    return orderItemVo;
+                }).collect(Collectors.toList());
+                lockVo.setLocks(locks);
+                R r = wareFeignService.orderLockStock(lockVo);
+                if (r.getCode() == 0){
+                    //锁定成功了
+                }else {
+                    // 锁定失败了
+                }
+            } else {
                 responseVo.setCode(2);
                 return responseVo;
             }
@@ -180,6 +202,24 @@ public class OrderServiceImpl extends ServiceImpl<OrderDao, OrderEntity> impleme
     }
 
     /**
+     * 保存订单数据
+     *
+     * @param orderCreateTo
+     */
+    private void saveOrder(OrderCreateTo orderCreateTo) {
+        // 保存订单数据
+        OrderEntity order = orderCreateTo.getOrder();
+        order.setModifyTime(new Date());
+        this.save(order);
+
+        // 保存订单项数据
+        List<OrderItemEntity> orderItems = orderCreateTo.getOrderItems();
+        orderItemService.saveBatch(orderItems);
+
+
+    }
+
+    /**
      * 创建订单
      */
     private OrderCreateTo createOrder() {
@@ -187,10 +227,11 @@ public class OrderServiceImpl extends ServiceImpl<OrderDao, OrderEntity> impleme
         // 1、生成订单号
         String orderSn = IdWorker.getTimeId();
         OrderEntity order = buildOrder(orderSn);
+        orderCreateTo.setOrder(order);
 
         // 2、获取所有的订单项
         List<OrderItemEntity> itemEntities = buildOrderItems(orderSn);
-
+        orderCreateTo.setOrderItems(itemEntities);
         // 3、计算价格相关
         computePrice(order, itemEntities);
 
@@ -249,9 +290,11 @@ public class OrderServiceImpl extends ServiceImpl<OrderDao, OrderEntity> impleme
     }
 
     private OrderEntity buildOrder(String orderSn) {
+        MemberRespVo memberRespVo = LoginUserInterceptor.loginUser.get();
         OrderEntity entity = new OrderEntity();
 
         entity.setOrderSn(orderSn);
+        entity.setMemberId(memberRespVo.getId());
         // 2、获取收货地址信息
         OrderSubmitVo orderSubmitVo = submitVoThreadLocal.get();
         R r = wareFeignService.getFare(orderSubmitVo.getAddrId());

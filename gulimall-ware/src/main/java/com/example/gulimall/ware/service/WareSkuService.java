@@ -3,7 +3,9 @@ package com.example.gulimall.ware.service;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.example.common.utils.PageUtils;
 import com.example.gulimall.ware.entity.WareSkuEntity;
+import com.example.gulimall.ware.vo.LockStockResult;
 import com.example.gulimall.ware.vo.SkuHasStockVo;
+import com.example.gulimall.ware.vo.WareSkuLockVo;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.List;
@@ -33,5 +35,12 @@ public interface WareSkuService extends IService<WareSkuEntity> {
      * @return
      */
     List<SkuHasStockVo> getSkusHasStock(List<Long> skuIds);
+
+    /**
+     * 锁库存 （订单）
+     * @param vo
+     * @return
+     */
+    List<LockStockResult> orderLockStock(WareSkuLockVo vo);
 }
 

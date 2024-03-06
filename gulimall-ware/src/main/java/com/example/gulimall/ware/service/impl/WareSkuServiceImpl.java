@@ -2,7 +2,9 @@ package com.example.gulimall.ware.service.impl;
 
 import com.example.common.utils.R;
 import com.example.gulimall.ware.feign.ProductFeignService;
+import com.example.gulimall.ware.vo.LockStockResult;
 import com.example.gulimall.ware.vo.SkuHasStockVo;
+import com.example.gulimall.ware.vo.WareSkuLockVo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -88,6 +90,12 @@ public class WareSkuServiceImpl extends ServiceImpl<WareSkuDao, WareSkuEntity> i
             return vo;
         }).collect(Collectors.toList());
         return collect;
+    }
+
+    @Override
+    public List<LockStockResult> orderLockStock(WareSkuLockVo vo) {
+
+        return null;
     }
 
 }

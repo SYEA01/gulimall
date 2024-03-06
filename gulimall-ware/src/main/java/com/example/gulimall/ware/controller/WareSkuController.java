@@ -5,7 +5,9 @@ import java.util.List;
 import java.util.Map;
 
 //import org.apache.shiro.authz.annotation.RequiresPermissions;
+import com.example.gulimall.ware.vo.LockStockResult;
 import com.example.gulimall.ware.vo.SkuHasStockVo;
+import com.example.gulimall.ware.vo.WareSkuLockVo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -27,6 +29,17 @@ import com.example.common.utils.R;
 public class WareSkuController {
     @Autowired
     private WareSkuService wareSkuService;
+
+    /**
+     * 锁库存 （订单）
+     *
+     * @return
+     */
+    @PostMapping("/lock/order")
+    public R orderLockStock(@RequestBody WareSkuLockVo vo) {
+        List<LockStockResult> stockResults = wareSkuService.orderLockStock(vo);
+        return R.ok().setData(stockResults);
+    }
 
     /**
      * 查询sku是否有库存
