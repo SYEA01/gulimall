@@ -41,6 +41,6 @@ public interface WareSkuService extends IService<WareSkuEntity> {
      * @param vo
      * @return
      */
-    List<LockStockResult> orderLockStock(WareSkuLockVo vo);
+    Boolean orderLockStock(WareSkuLockVo vo);
 }
 

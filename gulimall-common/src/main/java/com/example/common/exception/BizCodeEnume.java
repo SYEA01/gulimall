@@ -4,13 +4,14 @@ package com.example.common.exception;
  * @author taoao
  * 系统状态码
  * 10:通用
- *      001：参数校验
- *      002：短信验证码频率太高
+ * 001：参数校验
+ * 002：短信验证码频率太高
  * 11：商品
  * 12：订单
  * 13：购物车
  * 14：物流
  * 15：用户
+ * 21：库存
  */
 public enum BizCodeEnume {
     UNKNOW_EXCEPTION(10000, "系统未知异常"),
@@ -19,6 +20,7 @@ public enum BizCodeEnume {
     PRODUCT_UP_EXCEPTION(11000, "商品上架异常"),
     USER_EXIST_EXCEPTION(15001, "用户存在"),
     PHONE_EXIST_EXCEPTION(15002, "手机号存在"),
+    NO_STOCK_EXCEPTION(21000, "库存库存不足"),
     LOGINACCT_PASSWORD_INVALID_EXCEPTION(15003, "账号密码错误");
 
 

@@ -3,7 +3,7 @@
 
 <mapper namespace="com.example.gulimall.ware.dao.WareSkuDao">
 
-	<!-- 可根据自己的需求，是否要使用 -->
+    <!-- 可根据自己的需求，是否要使用 -->
     <resultMap type="com.example.gulimall.ware.entity.WareSkuEntity" id="wareSkuMap">
         <result property="id" column="id"/>
         <result property="skuId" column="sku_id"/>
@@ -19,10 +19,27 @@
           and ware_id = #{wareId};
     </update>
 
+    <!--锁定库存-->
+    <update id="lockSkuStock">
+        UPDATE wms_ware_sku
+        SET stock_locked = stock_locked + #{num}
+        WHERE sku_id = #{skuId}
+          AND ware_id = #{wareId}
+          AND stock - stock_locked >= #{num}
+    </update>
+
     <select id="getSkuStock" resultType="java.lang.Long">
         SELECT SUM(stock - stock_locked)
         FROM wms_ware_sku
         WHERE sku_id = #{skuId};
+    </select>
+
+    <!--查询这个商品在哪里有库存-->
+    <select id="listWareIdHasSkuStock" resultType="java.lang.Long">
+        SELECT ware_id
+        FROM wms_ware_sku
+        WHERE sku_id = #{skuId}
+          and stock - stock_locked > 0;
     </select>
 
 
