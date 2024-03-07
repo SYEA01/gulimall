@@ -140,6 +140,8 @@ public class OrderServiceImpl extends ServiceImpl<OrderDao, OrderEntity> impleme
         return confirmVo;
     }
 
+    // 本地事务，在分布式系统下，只能控制住自己的回滚。控制不了其他服务的回滚
+    // 应该用分布式事务
     @Transactional
     @Override
     public SubmitOrderResponseVo submitOrder(OrderSubmitVo vo) {
@@ -173,7 +175,7 @@ public class OrderServiceImpl extends ServiceImpl<OrderDao, OrderEntity> impleme
             BigDecimal viewPrice = vo.getPayPrice();  // 页面提交过来的价格
             if (Math.abs(payAmount.subtract(viewPrice).doubleValue()) < 0.01) {
                 // 金额对比成功
-                // 3、保存订单
+                // TODO 3、保存订单
                 saveOrder(orderCreateTo);
                 // 4、锁定库存,只要有异常，就回滚订单数据。
                 // 订单号、所有订单项（skuId，skuName，锁定的商品数量）
@@ -187,11 +189,13 @@ public class OrderServiceImpl extends ServiceImpl<OrderDao, OrderEntity> impleme
                     return orderItemVo;
                 }).collect(Collectors.toList());
                 lockVo.setLocks(locks);
-                // TODO 远程锁库存
+                // TODO 4、远程锁库存
                 R r = wareFeignService.orderLockStock(lockVo);
                 if (r.getCode() == 0) {
                     //锁定成功了
                     responseVo.setOrder(orderCreateTo.getOrder());
+                    // TODO 5、远程扣减积分
+                    int i = 10 / 0;  // 这里出了问题，订单会回滚，远程锁库存不会回滚
                     return responseVo;
                 } else {
                     // 锁定失败了
