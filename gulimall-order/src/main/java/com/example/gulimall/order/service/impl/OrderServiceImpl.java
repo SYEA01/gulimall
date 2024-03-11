@@ -191,6 +191,8 @@ public class OrderServiceImpl extends ServiceImpl<OrderDao, OrderEntity> impleme
                 }).collect(Collectors.toList());
                 lockVo.setLocks(locks);
                 // TODO 4、远程锁库存
+                // 为了保证高并发，库存服务自己回滚。  可以发消息给库存服务。
+                // 库存服务本身也可以使用自动解锁模式    使用消息队列
                 R r = wareFeignService.orderLockStock(lockVo);
                 if (r.getCode() == 0) {
                     //锁定成功了
