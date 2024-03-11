@@ -6,7 +6,6 @@ import com.example.common.exception.NoStockException;
 import com.example.common.utils.R;
 import com.example.common.vo.MemberRespVo;
 import com.example.gulimall.order.constant.OrderConstant;
-import com.example.gulimall.order.dao.OrderItemDao;
 import com.example.gulimall.order.entity.OrderItemEntity;
 import com.example.gulimall.order.enume.OrderStatusEnum;
 import com.example.gulimall.order.feign.CartFeignService;
@@ -17,6 +16,7 @@ import com.example.gulimall.order.interceptor.LoginUserInterceptor;
 import com.example.gulimall.order.service.OrderItemService;
 import com.example.gulimall.order.to.OrderCreateTo;
 import com.example.gulimall.order.vo.*;
+import io.seata.spring.annotation.GlobalTransactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.data.redis.core.script.DefaultRedisScript;
@@ -142,6 +142,7 @@ public class OrderServiceImpl extends ServiceImpl<OrderDao, OrderEntity> impleme
 
     // 本地事务，在分布式系统下，只能控制住自己的回滚。控制不了其他服务的回滚
     // 应该用分布式事务
+    @GlobalTransactional  // seata的全局事务注解
     @Transactional
     @Override
     public SubmitOrderResponseVo submitOrder(OrderSubmitVo vo) {
