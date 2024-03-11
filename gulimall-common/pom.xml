@@ -22,11 +22,11 @@
     </properties>
 
     <dependencies>
-        <!--导入分布式事务管理SEATA-->
-        <dependency>
-            <groupId>com.alibaba.cloud</groupId>
-            <artifactId>spring-cloud-starter-alibaba-seata</artifactId>
-        </dependency>
+<!--        &lt;!&ndash;导入分布式事务管理SEATA&ndash;&gt;-->
+<!--        <dependency>-->
+<!--            <groupId>com.alibaba.cloud</groupId>-->
+<!--            <artifactId>spring-cloud-starter-alibaba-seata</artifactId>-->
+<!--        </dependency>-->
 
         <!--自定义校验注解需要的依赖包-->
         <dependency>
