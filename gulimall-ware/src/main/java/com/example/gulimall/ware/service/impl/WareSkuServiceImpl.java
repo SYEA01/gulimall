@@ -1,5 +1,6 @@
 package com.example.gulimall.ware.service.impl;
 
+import com.alibaba.fastjson.TypeReference;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
@@ -13,13 +14,16 @@ import com.example.gulimall.ware.dao.WareSkuDao;
 import com.example.gulimall.ware.entity.WareOrderTaskDetailEntity;
 import com.example.gulimall.ware.entity.WareOrderTaskEntity;
 import com.example.gulimall.ware.entity.WareSkuEntity;
+import com.example.gulimall.ware.feign.OrderFeignService;
 import com.example.gulimall.ware.feign.ProductFeignService;
 import com.example.gulimall.ware.service.WareOrderTaskDetailService;
 import com.example.gulimall.ware.service.WareOrderTaskService;
 import com.example.gulimall.ware.service.WareSkuService;
 import com.example.gulimall.ware.vo.OrderItemVo;
+import com.example.gulimall.ware.vo.OrderVo;
 import com.example.gulimall.ware.vo.SkuHasStockVo;
 import com.example.gulimall.ware.vo.WareSkuLockVo;
+import com.rabbitmq.client.Channel;
 import lombok.Data;
 import org.springframework.amqp.core.Message;
 import org.springframework.amqp.rabbit.annotation.RabbitHandler;
@@ -31,11 +35,12 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-
+@RabbitListener(queues = "stock.release.stock.queue")
 @Service("wareSkuService")
 public class WareSkuServiceImpl extends ServiceImpl<WareSkuDao, WareSkuEntity> implements WareSkuService {
 
@@ -52,36 +57,85 @@ public class WareSkuServiceImpl extends ServiceImpl<WareSkuDao, WareSkuEntity> i
     WareOrderTaskDetailService wareOrderTaskDetailService;
 
     @Autowired
+    OrderFeignService orderFeignService;
+
+    @Autowired
     RabbitTemplate rabbitTemplate;
+
 
     /**
      * 1、库存自动解锁。
-     *      下订单成功，库存锁定成功，但是后面的业务调用失败，导致订单回滚
+     * 下订单成功，库存锁定成功，但是后面的业务调用失败，导致订单回滚
      * 2、订单失败。
-     *      锁库存失败
+     * 锁库存失败
+     * <p>
+     * <p>
+     * 只要解锁库存的消息失败，一定要告诉服务器，此次解锁失败。应该启动手动ACK机制
+     *
      * @param to
      * @param message
      */
 //    @RabbitListener(queues = "stock.release.stock.queue")
     @RabbitHandler
-    public void handleStockLockedRelease(StockLockedTo to, Message message) {
+    public void handleStockLockedRelease(StockLockedTo to, Message message, Channel channel) throws IOException {
         System.out.println("收到解锁库存的消息");
-        Long id = to.getId();  // 库存工作单的id
         StockDetailTo detail = to.getDetail();
         Long skuId = detail.getSkuId();
         Long detailId = detail.getId();  // 库存工作单详情id
         // 解锁
-        // 1、查询数据库关于这个订单的锁定库存信息
-        //  有：
+        // 1、查询数据库关于这个订单的锁定库存详情信息
+        //  有：证明库存锁定成功了
+        //      要不要解锁还要看订单情况
+        //           1）、没有这个订单，必须解锁
+        //           2）、有这个订单，不是解锁库存
+        //                  看订单状态：已取消，解锁库存
+        //                            没取消，不能解锁
         //  没有：库存锁定失败了，库存回滚了  这种情况无需解锁
         WareOrderTaskDetailEntity detailServiceById = wareOrderTaskDetailService.getById(detailId);
-        if (detailServiceById!=null){
+        if (detailServiceById != null) {
             // 解锁
-        }else {
+            Long id = to.getId();  // 库存工作单的id
+            WareOrderTaskEntity taskEntity = wareOrderTaskService.getById(id);
+            String orderSn = taskEntity.getOrderSn();  // 订单号
+            // 根据订单号查询订单的状态
+            R r = orderFeignService.getOrderStatus(orderSn);
+            if (r.getCode() == 0) {
+                // 订单数据返回成功
+                OrderVo orderVo = r.getData(new TypeReference<OrderVo>() {
+                });
+                if (orderVo == null || orderVo.getStatus() == 4) {
+                    // 订单不存在，必须解锁
+                    // 订单已经被取消了，可以解锁库存
+                    unLockStock(skuId, detail.getWareId(), detail.getSkuNum(), detailId);
+                    // 手动ACK，确认收到消息
+                    channel.basicAck(message.getMessageProperties().getDeliveryTag(), false);
+                }
+            } else {
+                // 远程调用失败，拒绝收到消息，将消息重新放回队列中，让别人继续消费，解锁
+                channel.basicReject(message.getMessageProperties().getDeliveryTag(), true);
+
+            }
+        } else {
             // 无需解锁
+            // 手动ACK，确认收到消息
+            channel.basicAck(message.getMessageProperties().getDeliveryTag(), false);
+
         }
 
 
+    }
+
+    /**
+     * 解锁库存
+     *
+     * @param skuId
+     * @param wareId
+     * @param num
+     * @param taskDetailId
+     */
+    private void unLockStock(Long skuId, Long wareId, Integer num, Long taskDetailId) {
+        // UPDATE wms_ware_sku SET stock_locked = stock_locked-#{num} WHERE sku_id = #{skuId} AND ware_id = #{wareId}
+        wareSkuDao.unLockStock(skuId, wareId, num);
     }
 
     @Override

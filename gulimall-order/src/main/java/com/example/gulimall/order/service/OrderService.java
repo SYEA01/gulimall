@@ -33,5 +33,12 @@ public interface OrderService extends IService<OrderEntity> {
      * @return
      */
     SubmitOrderResponseVo submitOrder(OrderSubmitVo vo);
+
+    /**
+     * 根据订单id返回订单状态
+     * @param orderSn
+     * @return
+     */
+    OrderEntity getOrderByOrderSn(String orderSn);
 }
 
