@@ -71,8 +71,15 @@ public class WareSkuServiceImpl extends ServiceImpl<WareSkuDao, WareSkuEntity> i
      * @param taskDetailId
      */
     private void unLockStock(Long skuId, Long wareId, Integer num, Long taskDetailId) {
+        // 库存解锁
         // UPDATE wms_ware_sku SET stock_locked = stock_locked-#{num} WHERE sku_id = #{skuId} AND ware_id = #{wareId}
         wareSkuDao.unLockStock(skuId, wareId, num);
+
+        // 更新库存工作单详情的状态
+        WareOrderTaskDetailEntity entity = new WareOrderTaskDetailEntity();
+        entity.setId(taskDetailId);
+        entity.setLockStatus(2);  // 变为已解锁
+        wareOrderTaskDetailService.updateById(entity);
     }
 
     @Override
@@ -245,11 +252,14 @@ public class WareSkuServiceImpl extends ServiceImpl<WareSkuDao, WareSkuEntity> i
                 if (orderVo == null || orderVo.getStatus() == 4) {
                     // 订单不存在，必须解锁
                     // 订单已经被取消了，可以解锁库存
-                    unLockStock(skuId, detail.getWareId(), detail.getSkuNum(), detailId);
+                    if (detailServiceById.getLockStatus() ==1) {
+                        // 当前库存工作单详情的状态是1，已锁定， 才可以解锁库存
+                        unLockStock(skuId, detail.getWareId(), detail.getSkuNum(), detailId);
+                    }
                 }
             } else {
                 // 远程调用失败，拒绝收到消息，将消息重新放回队列中，让别人继续消费，解锁
-
+                throw new RuntimeException("远程服务失败");
             }
         } else {
             // 无需解锁

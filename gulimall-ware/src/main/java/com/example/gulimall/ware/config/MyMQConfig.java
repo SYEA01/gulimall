@@ -65,14 +65,14 @@ public class MyMQConfig {
         return new Binding("stock.delay.queue", Binding.DestinationType.QUEUE, "stock.event.exchange", "stock.locked", null);
     }
 
-    /**
-     * 随便监听一个队列，当服务第一次连接MQ的时候，会自动创建出@Bean配置了，但是MQ中没有的队列、交换机、绑定关系
-     * @param message
-     */
-    @RabbitListener(queues = "stock.release.stock.queue")
-    public void handle(Message message){
-
-    }
+//    /**
+//     * 随便监听一个队列，当服务第一次连接MQ的时候，会自动创建出@Bean配置了，但是MQ中没有的队列、交换机、绑定关系
+//     * @param message
+//     */
+//    @RabbitListener(queues = "stock.release.stock.queue")
+//    public void handle(Message message){
+//
+//    }
 
 
 }
