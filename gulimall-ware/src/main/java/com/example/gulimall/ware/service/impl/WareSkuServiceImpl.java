@@ -5,6 +5,7 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.example.common.exception.NoStockException;
+import com.example.common.to.mq.OrderTo;
 import com.example.common.to.mq.StockDetailTo;
 import com.example.common.to.mq.StockLockedTo;
 import com.example.common.utils.PageUtils;
@@ -252,7 +253,7 @@ public class WareSkuServiceImpl extends ServiceImpl<WareSkuDao, WareSkuEntity> i
                 if (orderVo == null || orderVo.getStatus() == 4) {
                     // 订单不存在，必须解锁
                     // 订单已经被取消了，可以解锁库存
-                    if (detailServiceById.getLockStatus() ==1) {
+                    if (detailServiceById.getLockStatus() == 1) {
                         // 当前库存工作单详情的状态是1，已锁定， 才可以解锁库存
                         unLockStock(skuId, detail.getWareId(), detail.getSkuNum(), detailId);
                     }
@@ -264,6 +265,25 @@ public class WareSkuServiceImpl extends ServiceImpl<WareSkuDao, WareSkuEntity> i
         } else {
             // 无需解锁
         }
+
+    }
+
+    @Transactional
+    @Override
+    public void unLockStock(OrderTo orderTo) {
+        String orderSn = orderTo.getOrderSn();
+        // 查一下最新的库存状态，防止重复解锁库存
+        WareOrderTaskEntity orderTaskEntity = wareOrderTaskService.getOrderTaskByOrderSn(orderSn);
+        Long wareOrderTaskId = orderTaskEntity.getId();
+        // 按照库存工作单的id，去查询这个id下所有未解锁的库存工作单详情信息
+        List<WareOrderTaskDetailEntity> detailEntities = wareOrderTaskDetailService.list(new QueryWrapper<WareOrderTaskDetailEntity>().eq("task_id", wareOrderTaskId).eq("lock_status", 1));
+        if (detailEntities != null && detailEntities.size() > 0) {
+            // 依次解锁
+            for (WareOrderTaskDetailEntity detailEntity : detailEntities) {
+                unLockStock(detailEntity.getSkuId(), detailEntity.getWareId(), detailEntity.getSkuNum(), detailEntity.getId());
+            }
+        }
+
 
     }
 

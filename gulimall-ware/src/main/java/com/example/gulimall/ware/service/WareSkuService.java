@@ -1,6 +1,7 @@
 package com.example.gulimall.ware.service;
 
 import com.baomidou.mybatisplus.extension.service.IService;
+import com.example.common.to.mq.OrderTo;
 import com.example.common.to.mq.StockLockedTo;
 import com.example.common.utils.PageUtils;
 import com.example.gulimall.ware.entity.WareSkuEntity;
@@ -49,5 +50,11 @@ public interface WareSkuService extends IService<WareSkuEntity> {
      * @param to
      */
     void unLockStock(StockLockedTo to);
+
+    /**
+     * 解锁库存 （防止订单服务卡顿，导致订单状态一直改不了，库存消息先到期，查询订单状态是新建状态，就导致库存不能解锁）
+     * @param orderTo
+     */
+    void unLockStock(OrderTo orderTo);
 }
 

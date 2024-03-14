@@ -3,6 +3,7 @@ package com.example.gulimall.order.service.impl;
 import com.alibaba.fastjson.TypeReference;
 import com.baomidou.mybatisplus.core.toolkit.IdWorker;
 import com.example.common.exception.NoStockException;
+import com.example.common.to.mq.OrderTo;
 import com.example.common.utils.R;
 import com.example.common.vo.MemberRespVo;
 import com.example.gulimall.order.constant.OrderConstant;
@@ -17,6 +18,8 @@ import com.example.gulimall.order.service.OrderItemService;
 import com.example.gulimall.order.to.OrderCreateTo;
 import com.example.gulimall.order.vo.*;
 //import io.seata.spring.annotation.GlobalTransactional;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.data.redis.core.script.DefaultRedisScript;
@@ -70,6 +73,9 @@ public class OrderServiceImpl extends ServiceImpl<OrderDao, OrderEntity> impleme
 
     @Autowired
     StringRedisTemplate redisTemplate;
+
+    @Autowired
+    RabbitTemplate rabbitTemplate;
 
 
     @Override
@@ -198,7 +204,9 @@ public class OrderServiceImpl extends ServiceImpl<OrderDao, OrderEntity> impleme
                     //锁定成功了
                     responseVo.setOrder(orderCreateTo.getOrder());
                     // TODO 5、远程扣减积分
-                    int i = 10 / 0;  // 这里出了问题，订单会回滚，远程锁库存不会回滚
+//                    int i = 10 / 0;  // 这里出了问题，订单会回滚，远程锁库存不会回滚
+                    // TODO 订单创建成功，发送消息给MQ
+                    rabbitTemplate.convertAndSend("order.event.exchange", "order.create.order", orderCreateTo.getOrder());
                     return responseVo;
                 } else {
                     // 锁定失败了
@@ -220,6 +228,23 @@ public class OrderServiceImpl extends ServiceImpl<OrderDao, OrderEntity> impleme
     public OrderEntity getOrderByOrderSn(String orderSn) {
         OrderEntity orderEntity = this.getOne(new QueryWrapper<OrderEntity>().eq("order_sn", orderSn));
         return orderEntity;
+    }
+
+    @Override
+    public void closeOrder(OrderEntity entity) {
+        // 先去查询当前这个订单的最新状态
+        OrderEntity orderEntity = this.getById(entity.getId());
+        if (OrderStatusEnum.CREATE_NEW.getCode().equals(orderEntity.getStatus())) {
+            // 如果当前订单的状态是待付款，才可以关单
+            OrderEntity update = new OrderEntity();
+            update.setId(orderEntity.getId());
+            update.setStatus(OrderStatusEnum.CANCLED.getCode());
+            this.updateById(update);
+            // TODO 发给MQ一个订单解锁成功消息
+            OrderTo orderTo = new OrderTo();
+            BeanUtils.copyProperties(orderEntity, orderTo);
+            rabbitTemplate.convertAndSend("order.event.exchange", "order.release.other", orderTo);
+        }
     }
 
     /**

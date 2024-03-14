@@ -1,13 +1,12 @@
 package com.example.gulimall.order.config;
 
-import com.example.gulimall.order.entity.OrderEntity;
-import com.rabbitmq.client.Channel;
-import org.springframework.amqp.core.*;
-import org.springframework.amqp.rabbit.annotation.RabbitListener;
+import org.springframework.amqp.core.Binding;
+import org.springframework.amqp.core.Exchange;
+import org.springframework.amqp.core.Queue;
+import org.springframework.amqp.core.TopicExchange;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -84,19 +83,14 @@ public class MyMQConfig {
 
 
     /**
-     * 以下内容应该写在消费者的配置类中
-     * 监听 order.release.order.queue 这个队列
+     * 订单释放，直接和库存释放进行绑定
      *
-     * @param entity  消息的内容
-     * @param channel 通道
-     * @param message 消息
-     * @throws IOException
+     * @return
      */
-    @RabbitListener(queues = "order.release.order.queue")
-    public void listener(OrderEntity entity, Channel channel, Message message) throws IOException {
-        System.out.println("收到过期的订单信息，准备关闭订单。。。" + entity.getOrderSn() + entity.getModifyTime());
-        // 手动确认收到消息
-        long deliveryTag = message.getMessageProperties().getDeliveryTag();
-        channel.basicAck(deliveryTag, false);
+    @Bean
+    public Binding orderReleaseOtherBinding() {
+        // 目的地、目的地的类型、哪个交换机和这个目的地绑定的、路由键
+        return new Binding("stock.release.stock.queue", Binding.DestinationType.QUEUE, "order.event.exchange", "order.release.other.#", null);
     }
+
 }
