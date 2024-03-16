@@ -18,6 +18,7 @@ import com.example.gulimall.order.service.OrderItemService;
 import com.example.gulimall.order.to.OrderCreateTo;
 import com.example.gulimall.order.vo.*;
 //import io.seata.spring.annotation.GlobalTransactional;
+import org.springframework.amqp.AmqpException;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -243,7 +244,13 @@ public class OrderServiceImpl extends ServiceImpl<OrderDao, OrderEntity> impleme
             // TODO 发给MQ一个订单解锁成功消息
             OrderTo orderTo = new OrderTo();
             BeanUtils.copyProperties(orderEntity, orderTo);
-            rabbitTemplate.convertAndSend("order.event.exchange", "order.release.other", orderTo);
+            try {
+                // TODO 保证消息一定会发送出去，每一个消息都可以做好日志记录（给数据库保存每一个消息的详细信息）
+                // TODO 定期扫描数据库，将失败的消息再发送一遍；
+                rabbitTemplate.convertAndSend("order.event.exchange", "order.release.other", orderTo);
+            } catch (AmqpException e) {
+                // TODO 将没发送成功的消息，进行重试发送
+            }
         }
     }
 

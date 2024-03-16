@@ -48,6 +48,8 @@ public class StockReleaseListener {
     public void handleStockLockedRelease(StockLockedTo to, Message message, Channel channel) throws IOException {
         System.out.println("收到解锁库存的消息...");
         try {
+            // 当前消息是不是第二次及以后（重新）派发过来的
+//            Boolean redelivered = message.getMessageProperties().getRedelivered();
             // 解锁库存
             wareSkuService.unLockStock(to);
             channel.basicAck(message.getMessageProperties().getDeliveryTag(), false);
