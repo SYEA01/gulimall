@@ -5,6 +5,7 @@ import com.example.common.utils.PageUtils;
 import com.example.gulimall.order.entity.OrderEntity;
 import com.example.gulimall.order.vo.OrderConfirmVo;
 import com.example.gulimall.order.vo.OrderSubmitVo;
+import com.example.gulimall.order.vo.PayVo;
 import com.example.gulimall.order.vo.SubmitOrderResponseVo;
 
 import java.util.Map;
@@ -46,5 +47,12 @@ public interface OrderService extends IService<OrderEntity> {
      * @param entity
      */
     void closeOrder(OrderEntity entity);
+
+    /**
+     * 获取当前订单的支付信息
+     * @param orderSn
+     * @return
+     */
+    PayVo getOrderPay(String orderSn);
 }
 
