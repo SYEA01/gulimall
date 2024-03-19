@@ -38,6 +38,8 @@ public class OrderCloseListener {
         long deliveryTag = message.getMessageProperties().getDeliveryTag();
         try {
             orderService.closeOrder(entity);
+            // 手动调用支付宝收单；
+
             // 一切正常 ， 手动确认收到消息
             channel.basicAck(deliveryTag, false);
         } catch (Exception e) {

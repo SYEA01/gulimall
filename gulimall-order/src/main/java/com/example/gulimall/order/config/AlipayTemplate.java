@@ -29,19 +29,21 @@ public class AlipayTemplate {
     public static String notify_url = "http://55sl520776.zicp.fun/payed/notify";
 
     // 页面跳转同步通知页面路径 需http://格式的完整路径，不能加?id=123这类自定义参数，必须外网可以正常访问
-    public  String return_url = "http://member.gulimall.com/memberOrder.html";
+    public String return_url = "http://member.gulimall.com/memberOrder.html";
 
     // 签名方式
-    public  String sign_type = "RSA2";
+    public String sign_type = "RSA2";
 
     // 字符编码格式
-    public  String charset = "utf-8";
+    public String charset = "utf-8";
 
     // 支付宝网关
-    public  String gatewayUrl = "https://openapi-sandbox.dl.alipaydev.com/gateway.do";
+    public String gatewayUrl = "https://openapi-sandbox.dl.alipaydev.com/gateway.do";
 
     // 支付宝网关
-    public  String log_path = "E:\\sourceCode\\alipay.trade.page.pay-JAVA-UTF-8\\";
+    public String log_path = "E:\\sourceCode\\alipay.trade.page.pay-JAVA-UTF-8\\";
+
+    private String timeout = "30m";
 
 
     public String pay(PayVo vo) throws AlipayApiException {
@@ -70,6 +72,7 @@ public class AlipayTemplate {
                 + "\"total_amount\":\"" + totalAmount + "\","
                 + "\"subject\":\"" + subject + "\","
                 + "\"body\":\"" + body + "\","
+                + "\"timeout_express\":\"" + timeout + "\","
                 + "\"product_code\":\"FAST_INSTANT_TRADE_PAY\"}");
 
         String result = alipayClient.pageExecute(alipayRequest).getBody();
