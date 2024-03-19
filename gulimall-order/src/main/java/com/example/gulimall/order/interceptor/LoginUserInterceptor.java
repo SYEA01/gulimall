@@ -23,8 +23,10 @@ public class LoginUserInterceptor implements HandlerInterceptor {
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
 
         String uri = request.getRequestURI();
-        boolean match = new AntPathMatcher().match("/order/order/status/**", uri);
-        if (match){
+        AntPathMatcher matcher = new AntPathMatcher();
+        boolean match = matcher.match("/order/order/status/**", uri);
+        boolean match1 = matcher.match("/payed/notify", uri);
+        if (match || match1) {
             return true;
         }
 
@@ -35,7 +37,7 @@ public class LoginUserInterceptor implements HandlerInterceptor {
             return true;
         } else {
             // 没登录，就去登录
-            request.getSession().setAttribute("msg","请先进行登录。");
+            request.getSession().setAttribute("msg", "请先进行登录。");
             response.sendRedirect("http://auth.gulimall.com/login.html");
             return false;
         }

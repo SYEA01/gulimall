@@ -25,6 +25,9 @@ public class MemberWebController {
     @GetMapping("/memberOrder.html")
     public String memberOrderPage(@RequestParam(value = "pageNum", defaultValue = "1") Integer pageNum,
                                   Model model) {
+        // 可以获取到支付宝传来的所有请求数据
+        // request.验证签名，如果正确就可以修改订单状态
+
         Map<String, Object> params = new HashMap<>();
         params.put("page", pageNum.toString());
         R r = orderFeignService.listWithItem(params);
