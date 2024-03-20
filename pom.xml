@@ -27,5 +27,6 @@
         <module>gulimall-test-sso-client</module>
         <module>gulimall-test-sso-client2</module>
         <module>gulimall-cart</module>
+        <module>gulimall-seckill</module>
     </modules>
 </project>
