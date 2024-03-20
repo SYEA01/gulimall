@@ -22,6 +22,18 @@ spring:
             # 路径重写   【 将 /api/(?<segment>.*) 路径 自动重写成 /$\{segment} 路径  】
             - RewritePath=/api/(?<segment>.*),/$\{segment}
 
+        # 路由规则   【 只要发送 /api/coupon/** 格式的任意请求 ， 就会默认先路由到 gulimall-coupon 服务， 并且会把路径 /api/** 重写成 /**  】
+        - id: coupon_route
+          # lb 代表负载均衡  【 lb://服务名 】
+          uri: lb://gulimall-coupon
+          # 断言规则
+          predicates:
+            # 按照路径断言    前端项目，都加上 /api
+            - Path=/api/coupon/**
+          filters:
+            # 路径重写   【 将 /api/(?<segment>.*) 路径 自动重写成 /$\{segment} 路径  】
+            - RewritePath=/api/(?<segment>.*),/$\{segment}
+
         # 路由规则   【 只要发送 /api/product/** 格式的任意请求 ， 就会默认先路由到 gulimall-member 服务， 并且会把路径 /api/** 重写成 /**  】
         - id: member_route
           # lb 代表负载均衡  【 lb://服务名 】
@@ -65,6 +77,8 @@ spring:
 
 
 
+
+
         - id: gulimall_host_route
           uri: lb://gulimall-product
           predicates:
@@ -95,10 +109,16 @@ spring:
             # 只要 请求体的Host中的值是 order.gulimall.com 就匹配到gulimall-order服务
             - Host=order.gulimall.com
 
-
         - id: gulimall_member_route
           uri: lb://gulimall-member
           predicates:
             # 只要 请求体的Host中的值是 member.gulimall.com 就匹配到gulimall-member服务
             - Host=member.gulimall.com
+
+#        - id: gulimall_coupon_route
+#          uri: lb://gulimall-coupon
+#          predicates:
+#            # 只要 请求体的Host中的值是 coupon.gulimall.com 就匹配到gulimall-coupon服务
+#            - Host=coupon.gulimall.com
+
 
