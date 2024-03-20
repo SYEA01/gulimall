@@ -7,6 +7,7 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
+
 /**
  * 定时任务：
  *      1、类上标注 @EnableScheduling  // 开启定时任务功能
@@ -19,10 +20,10 @@ import org.springframework.stereotype.Component;
  *      3、自动配置类：TaskExecutionAutoConfiguration。 它的属性绑定在：TaskExecutionProperties 类中
  * @author taoao
  */
-@EnableScheduling  // 开启定时任务功能
 @Component
 @Slf4j
-@EnableAsync  // 开启异步任务功能
+//@EnableAsync  // 开启异步任务功能
+//@EnableScheduling  // 开启定时任务功能
 public class HelloSchedule {
 
     /**
