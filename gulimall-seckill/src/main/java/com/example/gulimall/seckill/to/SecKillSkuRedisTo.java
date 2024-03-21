@@ -2,6 +2,7 @@ package com.example.gulimall.seckill.to;
 
 import com.example.gulimall.seckill.vo.SkuInfoVo;
 import lombok.Data;
+import lombok.ToString;
 
 import java.math.BigDecimal;
 import java.util.Date;
@@ -10,6 +11,7 @@ import java.util.Date;
  * 给Redis中缓存秒杀商品信息的to
  */
 @Data
+@ToString
 public class SecKillSkuRedisTo {
     /**
      * id

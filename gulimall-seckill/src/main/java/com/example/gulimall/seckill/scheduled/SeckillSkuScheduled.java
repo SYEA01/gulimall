@@ -23,11 +23,13 @@ public class SeckillSkuScheduled {
 
 
     /**
+     * TODO 幂等性处理，已经上架过了的，就不用再次上架了
      * 每天晚上3点，上架最近3天需要秒杀的商品
      */
-    @Scheduled(cron = "0 0 3 * * ?")
+    @Scheduled(cron = "0 * * * * ?")
     public void uploadSeckillSkuLatest3Days(){
         // 1、重复上架无需处理
+        log.info("上架秒杀的商品信息。。。");
         seckillService.uploadSeckillSkuLatest3Days();
     }
 }

@@ -121,9 +121,9 @@ public class SeckillServiceImpl implements SeckillService {
                 RSemaphore semaphore = redissonClient.getSemaphore(SKU_STOCK_SEMAPHORE + randomCode);
                 // 使用库存 设置信号量
                 semaphore.trySetPermits(sku.getSeckillCount().intValue());  // 商品可以秒杀的数量作为信号量
-
+                System.out.println("secKillSkuRedisTo ============== " + secKillSkuRedisTo);
                 String s = JSON.toJSONString(secKillSkuRedisTo);
-                ops.put(sku.getId(), s);
+                ops.put(sku.getSkuId().toString(), s);
             });
         });
     }
