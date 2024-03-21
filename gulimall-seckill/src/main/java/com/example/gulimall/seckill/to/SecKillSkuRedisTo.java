@@ -4,6 +4,7 @@ import com.example.gulimall.seckill.vo.SkuInfoVo;
 import lombok.Data;
 
 import java.math.BigDecimal;
+import java.util.Date;
 
 /**
  * 给Redis中缓存秒杀商品信息的to
@@ -45,4 +46,13 @@ public class SecKillSkuRedisTo {
 
     // sku的详细信息
     private SkuInfoVo skuInfo;
+
+    // 当前商品秒杀的开始时间
+    private Long startTime;
+
+    // 当前商品秒杀的结束时间
+    private Long endTime;
+
+    // 当前sku的秒杀随机码
+    private String randomCode;
 }
