@@ -115,10 +115,10 @@ spring:
             # 只要 请求体的Host中的值是 member.gulimall.com 就匹配到gulimall-member服务
             - Host=member.gulimall.com
 
-#        - id: gulimall_coupon_route
-#          uri: lb://gulimall-coupon
-#          predicates:
-#            # 只要 请求体的Host中的值是 coupon.gulimall.com 就匹配到gulimall-coupon服务
-#            - Host=coupon.gulimall.com
+        - id: gulimall_seckill_route
+          uri: lb://gulimall-seckill
+          predicates:
+            # 只要 请求体的Host中的值是 coupon.gulimall.com 就匹配到gulimall-coupon服务
+            - Host=seckill.gulimall.com
 
 
