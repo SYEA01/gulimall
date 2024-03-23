@@ -3,6 +3,7 @@ package com.example.gulimall.seckill.service.impl;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.TypeReference;
 import com.baomidou.mybatisplus.core.toolkit.IdWorker;
+import com.example.common.to.mq.SecKillOrderTo;
 import com.example.common.utils.R;
 import com.example.common.vo.MemberRespVo;
 import com.example.gulimall.seckill.feign.CouponFeignService;
@@ -11,10 +12,11 @@ import com.example.gulimall.seckill.interceptor.LoginUserInterceptor;
 import com.example.gulimall.seckill.service.SeckillService;
 import com.example.gulimall.seckill.to.SecKillSkuRedisTo;
 import com.example.gulimall.seckill.vo.SeckillSessionsWithSkus;
-import com.example.gulimall.seckill.vo.SeckillSkuVo;
 import com.example.gulimall.seckill.vo.SkuInfoVo;
+import lombok.extern.slf4j.Slf4j;
 import org.redisson.api.RSemaphore;
 import org.redisson.api.RedissonClient;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.BoundHashOperations;
@@ -31,6 +33,7 @@ import java.util.stream.Collectors;
 /**
  * @author taoao
  */
+@Slf4j
 @Service
 public class SeckillServiceImpl implements SeckillService {
 
@@ -45,6 +48,9 @@ public class SeckillServiceImpl implements SeckillService {
 
     @Autowired
     RedissonClient redissonClient;
+
+    @Autowired
+    RabbitTemplate rabbitTemplate;
 
     // 缓存 活动的key的前缀
     private final String SESSIONS_CACHE_PREFIX = "seckill:sessions:";
@@ -63,11 +69,13 @@ public class SeckillServiceImpl implements SeckillService {
             //远程调用成功，上架商品
             List<SeckillSessionsWithSkus> sessionData = session.getData(new TypeReference<List<SeckillSessionsWithSkus>>() {
             });
-            // 缓存到redis
-            // 1、保存秒杀活动信息、
-            saveSessionInfos(sessionData);
-            // 2、以及保存秒杀商品信息
-            saveSessionSkuInfos(sessionData);
+            if (sessionData != null && sessionData.size() > 0) {
+                // 缓存到redis
+                // 1、保存秒杀活动信息、
+                saveSessionInfos(sessionData);
+                // 2、以及保存秒杀商品信息
+                saveSessionSkuInfos(sessionData);
+            }
 
         }
 
@@ -141,6 +149,7 @@ public class SeckillServiceImpl implements SeckillService {
 
     @Override
     public String kill(String killId, String key, Integer num) {
+        long s1 = System.currentTimeMillis();
 
         MemberRespVo memberRespVo = LoginUserInterceptor.loginUser.get();
 
@@ -170,23 +179,31 @@ public class SeckillServiceImpl implements SeckillService {
                         // 自动过期
                         long ttl = endTime - currentTime;
                         Boolean aBoolean = redisTemplate.opsForValue().setIfAbsent(userRedisKey, num.toString(), ttl, TimeUnit.MILLISECONDS);
-                        if (Boolean.FALSE.equals(aBoolean)) {
+                        if (Boolean.TRUE.equals(aBoolean)) {
                             // 占位成功，说明这个人从来没买过  可以接着往下走了
                             // 获取信号量
                             RSemaphore semaphore = redissonClient.getSemaphore(SKU_STOCK_SEMAPHORE + randomCode);
                             // 信号量-num    （获取num个信号量）
-                            try {
-                                boolean b = semaphore.tryAcquire(num, 100, TimeUnit.MILLISECONDS);
+                            boolean b = semaphore.tryAcquire(num);
+                            if (Boolean.TRUE.equals(b)) {
                                 // 秒杀成功
                                 // 快速下单。直接发送MQ
-                                String timeId = IdWorker.getTimeId();  // 创建一个id
-
+                                String timeId = IdWorker.getTimeId();  // 创建一个订单号
+                                SecKillOrderTo secKillOrderTo = new SecKillOrderTo();
+                                secKillOrderTo.setOrderSn(timeId);
+                                secKillOrderTo.setMemberId(memberRespVo.getId());
+                                secKillOrderTo.setNum(num);
+                                secKillOrderTo.setPromotionSessionId(skuRedisTo.getPromotionSessionId());
+                                secKillOrderTo.setSkuId(skuRedisTo.getSkuId());
+                                secKillOrderTo.setSeckillPrice(skuRedisTo.getSeckillPrice());
+                                rabbitTemplate.convertAndSend("order.event.exchange", "order.seckill.order", secKillOrderTo);
+                                long s2 = System.currentTimeMillis();
+                                log.info("耗时：{}毫秒", (s2 - s1));
                                 return timeId;
-                            } catch (InterruptedException e) {
-                                // 没有拿到信号量
+                            } else {
+                                // 没有信号量了
                                 return null;
                             }
-
                         } else {
                             // 失败代表这个人已经买过了
                             return null;
@@ -214,7 +231,6 @@ public class SeckillServiceImpl implements SeckillService {
         sessions.forEach(session -> {
             // 开始时间和结束时间的时间戳
             Date date = session.getStartTime();
-            System.out.println("date ===> " + new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(date));
             long startTime = date.getTime();
             long endTime = session.getEndTime().getTime();
             // redis 中的key

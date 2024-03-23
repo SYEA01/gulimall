@@ -4,6 +4,7 @@ import com.alibaba.fastjson.TypeReference;
 import com.baomidou.mybatisplus.core.toolkit.IdWorker;
 import com.example.common.exception.NoStockException;
 import com.example.common.to.mq.OrderTo;
+import com.example.common.to.mq.SecKillOrderTo;
 import com.example.common.utils.R;
 import com.example.common.vo.MemberRespVo;
 import com.example.gulimall.order.constant.OrderConstant;
@@ -311,6 +312,31 @@ public class OrderServiceImpl extends ServiceImpl<OrderDao, OrderEntity> impleme
         }
 
         return "success";
+    }
+
+    @Override
+    public void createSecKillOrder(SecKillOrderTo to) {
+        // TODO 保存订单信息
+        OrderEntity orderEntity = new OrderEntity();
+        String orderSn = to.getOrderSn();
+        orderEntity.setOrderSn(orderSn);
+        orderEntity.setMemberId(to.getMemberId());
+
+        orderEntity.setStatus(OrderStatusEnum.CREATE_NEW.getCode());
+        Integer num = to.getNum();
+        BigDecimal price = to.getSeckillPrice().multiply(BigDecimal.valueOf(num));
+        orderEntity.setPayAmount(price);
+
+        this.save(orderEntity);
+
+        // TODO 保存订单项信息
+        OrderItemEntity itemEntity = new OrderItemEntity();
+        itemEntity.setOrderSn(orderSn);
+        itemEntity.setRealAmount(price);
+        // TODO 获取当前SKU的详细信息进行设置
+        itemEntity.setSkuQuantity(num);
+
+        orderItemService.save(itemEntity);
     }
 
     /**

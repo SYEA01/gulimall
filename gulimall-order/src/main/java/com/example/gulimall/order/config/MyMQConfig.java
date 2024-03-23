@@ -17,7 +17,6 @@ import java.util.Map;
 public class MyMQConfig {
 
 
-
     // 直接使用@Bean 的方式 ，把Binding、Queue、Exchange放到Spring容器中，就会自动连接RabbitMQ，自动在RabbitMQ中创建出指定的交换机、队列，以及自动指定绑定关系
 
     /**
@@ -91,6 +90,21 @@ public class MyMQConfig {
     public Binding orderReleaseOtherBinding() {
         // 目的地、目的地的类型、哪个交换机和这个目的地绑定的、路由键
         return new Binding("stock.release.stock.queue", Binding.DestinationType.QUEUE, "order.event.exchange", "order.release.other.#", null);
+    }
+
+    /**
+     * 创建一个队列，监听秒杀商品消息
+     *
+     * @return
+     */
+    @Bean
+    public Queue orderSecKillOrderQueue() {
+        return new Queue("order.seckill.order.queue", true, false, false);
+    }
+
+    @Bean
+    public Binding orderSecKillOrderQueueBinding(){
+        return new Binding("order.seckill.order.queue", Binding.DestinationType.QUEUE, "order.event.exchange", "order.seckill.order", null);
     }
 
 }
