@@ -1,15 +1,19 @@
 package com.example.gulimall.product.service.impl;
 
+import com.alibaba.fastjson.TypeReference;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.example.common.utils.PageUtils;
 import com.example.common.utils.Query;
+import com.example.common.utils.R;
 import com.example.gulimall.product.dao.SkuInfoDao;
 import com.example.gulimall.product.entity.SkuImagesEntity;
 import com.example.gulimall.product.entity.SkuInfoEntity;
 import com.example.gulimall.product.entity.SpuInfoDescEntity;
+import com.example.gulimall.product.feign.SecKillFeignService;
 import com.example.gulimall.product.service.*;
+import com.example.gulimall.product.vo.SecKillInfoVo;
 import com.example.gulimall.product.vo.SkuItemSaleAttrVo;
 import com.example.gulimall.product.vo.SkuItemVo;
 import com.example.gulimall.product.vo.SpuItemAttrGroupVo;
@@ -39,6 +43,9 @@ public class SkuInfoServiceImpl extends ServiceImpl<SkuInfoDao, SkuInfoEntity> i
 
     @Autowired
     SkuSaleAttrValueService skuSaleAttrValueService;
+
+    @Autowired
+    SecKillFeignService secKillFeignService;
 
     @Autowired
     ThreadPoolExecutor executor;
@@ -143,8 +150,19 @@ public class SkuInfoServiceImpl extends ServiceImpl<SkuInfoDao, SkuInfoEntity> i
             skuItemVo.setImages(images);
         }, executor);
 
+        // 查询当前sku是否参与秒杀优惠
+        CompletableFuture<Void> secKillFuture = CompletableFuture.runAsync(() -> {
+            R r = secKillFeignService.getSkuSeckillInfo(skuId);
+            if (r.getCode() == 0) {
+                SecKillInfoVo secKillInfoVo = r.getData(new TypeReference<SecKillInfoVo>() {
+                });
+                skuItemVo.setSecKillInfo(secKillInfoVo);
+            }
+        }, executor);
+
+
         // 等待所有任务都完成后   infoFuture可以省略
-        CompletableFuture.allOf(infoFuture, saleAttrFuture, descFuture, baseAttrFuture, imageFuture).get();
+        CompletableFuture.allOf(infoFuture, saleAttrFuture, descFuture, baseAttrFuture, imageFuture, secKillFuture).get();
 
 
         return skuItemVo;

@@ -20,6 +20,7 @@ import org.springframework.stereotype.Service;
 
 import java.text.SimpleDateFormat;
 import java.util.*;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 /**
@@ -103,6 +104,33 @@ public class SeckillServiceImpl implements SeckillService {
 
         }
 
+        return null;
+    }
+
+    @Override
+    public SecKillSkuRedisTo getSkuSeckillInfo(Long skuId) {
+        // 1、找到所有需要参与秒杀的商品的key
+        BoundHashOperations<String, String, String> hashOps = redisTemplate.boundHashOps(SKUKILL_CACHE_PREFIX);
+        Set<String> keys = hashOps.keys();
+        if (keys != null && keys.size() > 0) {
+            String regx = "\\d_" + skuId;
+            for (String key : keys) {
+                if (Pattern.matches(regx, key)) {  // 如果正则匹配上了
+                    String skuJson = hashOps.get(key);
+                    SecKillSkuRedisTo skuRedisTo = JSON.parseObject(skuJson, SecKillSkuRedisTo.class);
+                    // 当前时间
+                    long currentTime = new Date().getTime();
+                    if (currentTime >= skuRedisTo.getStartTime() && currentTime <= skuRedisTo.getEndTime()) {
+                        // 如果当前时间在某个秒杀活动时间段内
+                        return skuRedisTo;
+                    } else {
+                        // 如果当前时间不在某个秒杀活动时间段内，不可以返回随机码
+                        skuRedisTo.setRandomCode(null);
+                    }
+                    return skuRedisTo;
+                }
+            }
+        }
         return null;
     }
 

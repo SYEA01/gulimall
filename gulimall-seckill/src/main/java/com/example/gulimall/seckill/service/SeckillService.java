@@ -18,4 +18,11 @@ public interface SeckillService {
      * @return
      */
     List<SecKillSkuRedisTo> getCurrentSeckillSkus();
+
+    /**
+     * 查询当前sku是否参与秒杀优惠
+     * @param skuId
+     * @return
+     */
+    SecKillSkuRedisTo getSkuSeckillInfo(Long skuId);
 }
