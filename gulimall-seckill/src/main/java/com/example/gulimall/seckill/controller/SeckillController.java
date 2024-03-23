@@ -6,6 +6,7 @@ import com.example.gulimall.seckill.to.SecKillSkuRedisTo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
@@ -37,5 +38,19 @@ public class SeckillController {
     public R getSkuSeckillInfo(@PathVariable Long skuId) {
         SecKillSkuRedisTo to = seckillService.getSkuSeckillInfo(skuId);
         return R.ok().setData(to);
+    }
+
+    /**
+     * 秒杀请求
+     *
+     * @param killId
+     * @return
+     */
+    @GetMapping("/kill")
+    public R secKill(@RequestParam String killId,
+                     @RequestParam String key,
+                     @RequestParam Integer num) {
+        // 1、也得判断是否登录  【 拦截器。。。 】
+        return null;
     }
 }
