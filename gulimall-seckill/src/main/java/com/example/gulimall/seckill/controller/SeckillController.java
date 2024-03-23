@@ -4,14 +4,13 @@ import com.example.common.utils.R;
 import com.example.gulimall.seckill.service.SeckillService;
 import com.example.gulimall.seckill.to.SecKillSkuRedisTo;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-@RestController
+@Controller
 public class SeckillController {
 
     @Autowired
@@ -23,6 +22,7 @@ public class SeckillController {
      * @return
      */
     @GetMapping("/currentSeckillSkus")
+    @ResponseBody
     public R getCurrentSeckillSkus() {
         List<SecKillSkuRedisTo> vos = seckillService.getCurrentSeckillSkus();
         return R.ok().setData(vos);
@@ -34,6 +34,7 @@ public class SeckillController {
      * @param skuId
      * @return
      */
+    @ResponseBody
     @GetMapping("/sku/seckill/{skuId}")
     public R getSkuSeckillInfo(@PathVariable Long skuId) {
         SecKillSkuRedisTo to = seckillService.getSkuSeckillInfo(skuId);
@@ -47,13 +48,15 @@ public class SeckillController {
      * @return
      */
     @GetMapping("/kill")
-    public R secKill(@RequestParam String killId,
-                     @RequestParam String key,
-                     @RequestParam Integer num) {
+    public String secKill(@RequestParam String killId,
+                          @RequestParam String key,
+                          @RequestParam Integer num,
+                          Model model) {
         // 1、也得判断是否登录  【 拦截器。。。 】
 
         // 2、
         String orderSn = seckillService.kill(killId, key, num);
-        return R.ok().setData(orderSn);
+        model.addAttribute("orderSn", orderSn);
+        return "success";
     }
 }

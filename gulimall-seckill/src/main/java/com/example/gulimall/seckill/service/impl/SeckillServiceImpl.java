@@ -147,6 +147,8 @@ public class SeckillServiceImpl implements SeckillService {
         return null;
     }
 
+    // TODO 秒杀商品的时候，每一个数据都有过期时间
+    // TODO 秒杀后续的流畅，简化了收货地址等信息
     @Override
     public String kill(String killId, String key, Integer num) {
         long s1 = System.currentTimeMillis();
