@@ -51,6 +51,9 @@ public class SeckillController {
                      @RequestParam String key,
                      @RequestParam Integer num) {
         // 1、也得判断是否登录  【 拦截器。。。 】
-        return null;
+
+        // 2、
+        String orderSn = seckillService.kill(killId, key, num);
+        return R.ok().setData(orderSn);
     }
 }

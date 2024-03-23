@@ -2,9 +2,12 @@ package com.example.gulimall.seckill.service.impl;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.TypeReference;
+import com.baomidou.mybatisplus.core.toolkit.IdWorker;
 import com.example.common.utils.R;
+import com.example.common.vo.MemberRespVo;
 import com.example.gulimall.seckill.feign.CouponFeignService;
 import com.example.gulimall.seckill.feign.ProductFeignService;
+import com.example.gulimall.seckill.interceptor.LoginUserInterceptor;
 import com.example.gulimall.seckill.service.SeckillService;
 import com.example.gulimall.seckill.to.SecKillSkuRedisTo;
 import com.example.gulimall.seckill.vo.SeckillSessionsWithSkus;
@@ -17,9 +20,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.BoundHashOperations;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 
 import java.text.SimpleDateFormat;
 import java.util.*;
+import java.util.concurrent.TimeUnit;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
@@ -131,6 +136,72 @@ public class SeckillServiceImpl implements SeckillService {
                 }
             }
         }
+        return null;
+    }
+
+    @Override
+    public String kill(String killId, String key, Integer num) {
+
+        MemberRespVo memberRespVo = LoginUserInterceptor.loginUser.get();
+
+        // 1、获取当前秒杀商品的详细信息
+        BoundHashOperations<String, String, String> hashOps = redisTemplate.boundHashOps(SKUKILL_CACHE_PREFIX);
+        String skuJson = hashOps.get(killId);
+        if (StringUtils.isEmpty(skuJson)) {
+            return null;
+        } else {
+            SecKillSkuRedisTo skuRedisTo = JSON.parseObject(skuJson, SecKillSkuRedisTo.class);
+            // 2、校验合法性
+            // 1)、秒杀时间过没过
+            Long startTime = skuRedisTo.getStartTime();
+            Long endTime = skuRedisTo.getEndTime();
+            long currentTime = new Date().getTime();
+            if (currentTime >= startTime && currentTime <= endTime) {
+                // 时间合法
+                // 2）、校验随机码和商品id
+                String randomCode = skuRedisTo.getRandomCode();
+                String id = skuRedisTo.getPromotionSessionId() + "_" + skuRedisTo.getSkuId();
+                if (Objects.equals(randomCode, key) && Objects.equals(killId, id)) {
+                    // 3）、验证购物的数量是否合理
+                    if (num <= skuRedisTo.getSeckillLimit().intValue()) {
+                        // 4）、验证这个人是否已经购买过。幂等性。 如果秒杀成功，就去占位。 userId_sessionId_skuId
+                        // setnx
+                        String userRedisKey = memberRespVo.getId() + "_" + id;
+                        // 自动过期
+                        long ttl = endTime - currentTime;
+                        Boolean aBoolean = redisTemplate.opsForValue().setIfAbsent(userRedisKey, num.toString(), ttl, TimeUnit.MILLISECONDS);
+                        if (Boolean.FALSE.equals(aBoolean)) {
+                            // 占位成功，说明这个人从来没买过  可以接着往下走了
+                            // 获取信号量
+                            RSemaphore semaphore = redissonClient.getSemaphore(SKU_STOCK_SEMAPHORE + randomCode);
+                            // 信号量-num    （获取num个信号量）
+                            try {
+                                boolean b = semaphore.tryAcquire(num, 100, TimeUnit.MILLISECONDS);
+                                // 秒杀成功
+                                // 快速下单。直接发送MQ
+                                String timeId = IdWorker.getTimeId();  // 创建一个id
+
+                                return timeId;
+                            } catch (InterruptedException e) {
+                                // 没有拿到信号量
+                                return null;
+                            }
+
+                        } else {
+                            // 失败代表这个人已经买过了
+                            return null;
+                        }
+                    }
+                } else {
+                    // 随机码不通过
+                    return null;
+                }
+            } else {
+                // 时间不通过
+                return null;
+            }
+        }
+
         return null;
     }
 
