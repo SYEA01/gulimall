@@ -2,6 +2,7 @@ package com.example.gulimall.seckill.service.impl;
 
 import com.alibaba.csp.sentinel.Entry;
 import com.alibaba.csp.sentinel.SphU;
+import com.alibaba.csp.sentinel.annotation.SentinelResource;
 import com.alibaba.csp.sentinel.slots.block.BlockException;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.TypeReference;
@@ -84,6 +85,18 @@ public class SeckillServiceImpl implements SeckillService {
 
     }
 
+    /**
+     * 这是getCurrentSeckillSkusResource资源的限流降级方法
+     * @param e
+     * @return
+     */
+    public List<SecKillSkuRedisTo> ziDingYiBlockHandler(BlockException e){
+        log.error("getCurrentSeckillSkusResource资源被限流了，这是自定义降级方法。。。");
+        return null;
+    }
+
+    // 方式2、使用@SentinelResource("自定义资源名称")注解自定义受保护资源
+    @SentinelResource(value = "getCurrentSeckillSkusResource",blockHandler = "ziDingYiBlockHandler")
     @Override
     public List<SecKillSkuRedisTo> getCurrentSeckillSkus() {
         // 1、确定当前时间 属于哪个秒杀场次
