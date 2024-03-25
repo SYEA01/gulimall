@@ -1,5 +1,8 @@
 package com.example.gulimall.seckill.service.impl;
 
+import com.alibaba.csp.sentinel.Entry;
+import com.alibaba.csp.sentinel.SphU;
+import com.alibaba.csp.sentinel.slots.block.BlockException;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.TypeReference;
 import com.baomidou.mybatisplus.core.toolkit.IdWorker;
@@ -86,36 +89,54 @@ public class SeckillServiceImpl implements SeckillService {
         // 1、确定当前时间 属于哪个秒杀场次
         // 当前时间
         long time = new Date().getTime();
-        // 去redis中查询所有的以 seckill:sessions: 开头的场次信息
-        Set<String> keys = redisTemplate.keys(SESSIONS_CACHE_PREFIX + "*");
-        for (String key : keys) {
-            // key格式示例：seckill:sessions:1711072800000_1711076400000
-            String timeInterval = key.replace(SESSIONS_CACHE_PREFIX, "");  // 1711072800000_1711076400000
-            String[] s = timeInterval.split("_");
-            Long startTime = Long.parseLong(s[0]);  // 开始时间：1711072800000
-            Long endTime = Long.parseLong(s[1]);  // 结束时间：1711076400000
-            // 得到当前场次
-            if (time >= startTime && time <= endTime) {
-                // 2、获取这个秒杀场次需要的所有商品信息
-                // 获取所有key以seckill:sessions: 开头的秒杀场次的value
-                List<String> range = redisTemplate.opsForList().range(key, -100, 100);
-                // 获取所有key为seckill:skus 的秒杀商品信息
-                BoundHashOperations<String, String, String> hashOps = redisTemplate.boundHashOps(SKUKILL_CACHE_PREFIX);
-                // 根据场次id获取商品信息 JSON
-                List<String> list = hashOps.multiGet(range);
-                if (list != null) {
-                    List<SecKillSkuRedisTo> collect = list.stream().map(item -> {
-                        // 将查询出的所有的商品（String格式）信息转换为to
-                        SecKillSkuRedisTo killSkuRedisTo = JSON.parseObject(item, SecKillSkuRedisTo.class);
+
+        /**
+         * 1、自定义一段受保护的资源【 包裹任意代码 】：SphU.entry("自定义资源名字")
+         *      try (Entry entry = SphU.entry("seckillSkus")) {
+         *      }
+         * 2、可以在Sentinel控制台对这段资源进行限流、熔断降级
+         *      如果这段资源被限流、熔断降级了，就会执行cache中的代码
+         *          } catch (BlockException e) {
+         *             // 被限流了，就会抛出BlockException异常，然后执行这个里面的代码
+         *
+         *         }
+         */
+        try (Entry entry = SphU.entry("seckillSkus")) {
+            // 去redis中查询所有的以 seckill:sessions: 开头的场次信息
+            Set<String> keys = redisTemplate.keys(SESSIONS_CACHE_PREFIX + "*");
+            for (String key : keys) {
+                // key格式示例：seckill:sessions:1711072800000_1711076400000
+                String timeInterval = key.replace(SESSIONS_CACHE_PREFIX, "");  // 1711072800000_1711076400000
+                String[] s = timeInterval.split("_");
+                Long startTime = Long.parseLong(s[0]);  // 开始时间：1711072800000
+                Long endTime = Long.parseLong(s[1]);  // 结束时间：1711076400000
+                // 得到当前场次
+                if (time >= startTime && time <= endTime) {
+                    // 2、获取这个秒杀场次需要的所有商品信息
+                    // 获取所有key以seckill:sessions: 开头的秒杀场次的value
+                    List<String> range = redisTemplate.opsForList().range(key, -100, 100);
+                    // 获取所有key为seckill:skus 的秒杀商品信息
+                    BoundHashOperations<String, String, String> hashOps = redisTemplate.boundHashOps(SKUKILL_CACHE_PREFIX);
+                    // 根据场次id获取商品信息 JSON
+                    List<String> list = hashOps.multiGet(range);
+                    if (list != null) {
+                        List<SecKillSkuRedisTo> collect = list.stream().map(item -> {
+                            // 将查询出的所有的商品（String格式）信息转换为to
+                            SecKillSkuRedisTo killSkuRedisTo = JSON.parseObject(item, SecKillSkuRedisTo.class);
 //                        killSkuRedisTo.setRandomCode(null);  // 当前秒杀开始了，需要用到随机码
-                        return killSkuRedisTo;
-                    }).collect(Collectors.toList());
-                    return collect;
+                            return killSkuRedisTo;
+                        }).collect(Collectors.toList());
+                        return collect;
+                    }
+                    break;
                 }
-                break;
             }
+        } catch (BlockException e) {
+            // 被限流了，就会抛出BlockException异常，然后执行这个里面的代码
+            log.error("资源被限流，{}", e.getMessage());
 
         }
+
 
         return null;
     }
