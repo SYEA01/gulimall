@@ -129,11 +129,18 @@
             <artifactId>spring-cloud-starter-alibaba-sentinel</artifactId>
         </dependency>
 
-        <!--引入链路追踪Sleuth-->
+<!--        &lt;!&ndash;引入链路追踪Sleuth&ndash;&gt;-->
+<!--        <dependency>-->
+<!--            <groupId>org.springframework.cloud</groupId>-->
+<!--            <artifactId>spring-cloud-starter-sleuth</artifactId>-->
+<!--        </dependency>-->
+
+        <!--引入Zipkin 【 因为Zipkin默认引入了Sleuth，所以引入Zipkin，就不用引入Sleuth了 】-->
         <dependency>
             <groupId>org.springframework.cloud</groupId>
-            <artifactId>spring-cloud-starter-sleuth</artifactId>
+            <artifactId>spring-cloud-starter-zipkin</artifactId>
         </dependency>
+
     </dependencies>
 
     <dependencyManagement>  <!--依赖管理-->
