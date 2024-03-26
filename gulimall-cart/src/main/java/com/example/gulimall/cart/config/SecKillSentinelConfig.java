@@ -32,7 +32,7 @@ public class SecKillSentinelConfig {
              */
             @Override
             public void blocked(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse, BlockException e) throws IOException {
-                R error = R.error(BizCodeEnume.TO_MANY_REQUEST.getCode(), BizCodeEnume.TO_MANY_REQUEST.getMessage());
+                R error = R.error(BizCodeEnume.TOO_MANY_REQUEST.getCode(), BizCodeEnume.TOO_MANY_REQUEST.getMessage());
                 httpServletResponse.setCharacterEncoding("UTF-8");
                 httpServletResponse.setContentType("application/json");
                 httpServletResponse.getWriter().write(JSON.toJSONString(error));

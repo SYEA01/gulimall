@@ -16,6 +16,6 @@ public class SecKillFeignServiceFallBack implements SecKillFeignService {
     @Override
     public R getSkuSeckillInfo(Long skuId) {
         log.info("getSkuSeckillInfo熔断方法调用：秒杀服务的远程调用失败了，调用了此方法。。。");
-        return R.error(BizCodeEnume.TO_MANY_REQUEST.getCode(), BizCodeEnume.TO_MANY_REQUEST.getMessage());
+        return R.error(BizCodeEnume.TOO_MANY_REQUEST.getCode(), BizCodeEnume.TOO_MANY_REQUEST.getMessage());
     }
 }
