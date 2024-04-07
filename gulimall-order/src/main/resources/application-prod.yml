@@ -1,0 +1,36 @@
+server:
+  port: 9000
+
+spring:
+  datasource:
+    username: root
+    password: 123456
+    url: jdbc:mysql://gulimall-mysql.gulimall:3306/gulimall_sms?useSSL=false&serverTimezone=Asia/Shanghai
+    driver-class-name: com.mysql.jdbc.Driver
+  # RabbitMQ 连接信息
+  rabbitmq:
+    host: gulimall-rabbitmq.gulimall
+    port: 5672
+    virtual-host: /
+    username: guest
+    password: guest
+    # 开启发送端确认  消息抵达broker确认
+    publisher-confirms: true
+    # 开启发送端确认  消息抵达queue确认
+    publisher-returns: true
+    # 如果消息抵达了队列，就会以异步的方式优先执行publisher-returns这个回调
+    template:
+      mandatory: true
+      # 手动ack消息
+    listener:
+      simple:
+        acknowledge-mode: manual
+
+
+
+mybatis-plus:
+  mapper-locations: classpath*:/mapper/**/*.xml  # 寻找mapper文件
+  global-config:
+    db-config:
+      id-type: auto  # 主键自增
+

@@ -1,0 +1,47 @@
+spring:
+  datasource:
+    username: root
+    password: 123456
+    url: jdbc:mysql://gulimall-mysql.gulimall:3306/gulimall_sms?useSSL=false&serverTimezone=Asia/Shanghai
+    driver-class-name: com.mysql.jdbc.Driver
+  cloud:
+    nacos:
+      discovery:
+        # Nacos注册中心的地址
+        server-addr: nacos-service.gulimall:8848
+  jackson:
+    # 指定格式化的规则
+    date-format: yyyy-MM-dd HH:mm:ss
+  thymeleaf:
+    # 开发期间关闭thymeleaf 的缓存
+    cache: false
+  redis:
+    host: gulimall-redis.gulimall
+    port: 6379
+
+
+
+mybatis-plus:
+  mapper-locations: classpath*:/mapper/**/*.xml  # 寻找mapper文件
+  global-config:
+    db-config:
+      id-type: auto  # 主键自增
+      # 逻辑已删除值(默认为 1)
+      logic-delete-value: 1
+      # 逻辑未删除值(默认为 0)
+      logic-not-delete-value: 0
+server:
+  port: 10001
+# 调整日志级别
+logging:
+  level:
+    com.example.gulimall: debug
+
+
+gulimall:
+  thread:
+    core-size: 20
+    max-size: 200
+    keep-alive-time: 10
+
+
