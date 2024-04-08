@@ -17,6 +17,7 @@ pipeline {
       REGISTRY = 'docker.io'
       DOCKERHUB_NAMESPACE = '18199445947'
       GITEE_ACCOUNT = 'taoao0101@163.com'
+      BRANCH_NAME = 'master'
   }
 
   stages {
