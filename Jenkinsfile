@@ -28,7 +28,7 @@ pipeline {
         sh 'echo 正在构建 $PROJECT_NAME    版本号 $PROJECT_VERSION    将会提交给  $REGISTRY  镜像仓库'
         sh 'echo 正在完整编译项目'
         container ('maven'){
-          sh 'mvn clean install -Dmaven.test.skip=true'
+          sh 'mvn clean install -Dmaven.test.skip=true -gs `pwd`/mvn-settings.xml'
         }
       }
     }
