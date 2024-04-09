@@ -1,25 +1,25 @@
 kind: Deployment
 apiVersion: apps/v1
 metadata:
-  name: gulimall-product
+  name: renren-fast
   namespace: gulimall
   labels:
-    app: gulimall-product
+    app: renren-fast
     version: v1
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: gulimall-product
+      app: renren-fast
       version: v1
   template:
     metadata:
       labels:
-        app: gulimall-product
+        app: renren-fast
         version: v1
     spec:
       containers:
-        - name: gulimall-product
+        - name: renren-fast
           image: $REGISTRY/$DOCKERHUB_NAMESPACE/$PROJECT_NAME:$PROJECT_NAME
           ports:
             - containerPort: 8080
@@ -49,10 +49,10 @@ spec:
 kind: Service
 apiVersion: v1
 metadata:
-  name: gulimall-product
+  name: renren-fast
   namespace: gulimall
   labels:
-    app: gulimall-product
+    app: renren-fast
     version: v1
 spec:
   ports:
@@ -60,8 +60,8 @@ spec:
       protocol: TCP
       port: 8080
       targetPort: 8080
-      nodePort: 20013
+      nodePort: 20023
   selector:
-    app: gulimall-product
+    app: renren-fast
   type: NodePort
   sessionAffinity: None
