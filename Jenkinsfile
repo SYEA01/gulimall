@@ -12,7 +12,7 @@ pipeline {
       KUBECONFIG_CREDENTIAL_ID = 'demo-kubeconfig'
       REGISTRY = 'docker.io'
       DOCKERHUB_NAMESPACE = '18199445947'
-      GITEE_ACCOUNT = '18199445947'
+      GITEE_ACCOUNT = 'SYEA01'
       BRANCH_NAME = 'master'
 
   }
