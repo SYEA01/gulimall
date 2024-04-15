@@ -7,11 +7,11 @@ pipeline {
 
 
   environment {
-      DOCKER_CREDENTIAL_ID = 'dockerhub-id'
+      DOCKER_CREDENTIAL_ID = 'aliyun-hub-id'
       GITEE_CREDENTIAL_ID = 'gitee-id'
       KUBECONFIG_CREDENTIAL_ID = 'demo-kubeconfig'
-      REGISTRY = 'docker.io'
-      DOCKERHUB_NAMESPACE = '18199445947'
+      REGISTRY = 'registry.cn-beijing.aliyuncs.com'
+      DOCKERHUB_NAMESPACE = 'taoao'
       GITEE_ACCOUNT = 'SYEA01'
       BRANCH_NAME = 'master'
 
