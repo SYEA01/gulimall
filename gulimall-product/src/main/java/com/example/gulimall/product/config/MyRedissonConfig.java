@@ -21,7 +21,7 @@ public class MyRedissonConfig {
     public RedissonClient redisson() {
         // 1、创建配置
         Config config = new Config();
-        config.useSingleServer().setAddress("redis://192.168.100.135:6379");
+        config.useSingleServer().setAddress("redis://gulimall-redis.gulimall:6379");
         // 2、根据config创建出 RedissonClient 实例
         RedissonClient redissonClient = Redisson.create(config);
         return redissonClient;
