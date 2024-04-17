@@ -8,7 +8,7 @@ spring:
     nacos:
       discovery:
         # Nacos注册中心的地址
-        server-addr: nacos-service.gulimall:8848
+        server-addr: gulimall-nacos.gulimall:8848
   jackson:
     # 指定格式化的规则
     date-format: yyyy-MM-dd HH:mm:ss
